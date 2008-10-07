@@ -1,0 +1,179 @@
+body {
+  color: black;
+       /*background-color: rgb(240,240,240);*/
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+html > body {
+  font-size: 8.5pt;
+
+}
+
+.sisalto {
+	 overflow: hidden;
+	 padding: 1em 2.5em 1em 2.5em;
+	 padding-right: 2.5em;
+             border-right: dotted 1px #6666CC;
+	     }
+
+a { 
+    text-decoration: none;
+    
+    }
+
+.peli {
+        /*background-color: #CCCCFF;*/
+      }
+.kuvaus { 
+        padding: 0.5em;
+          }
+
+.pelinotsikko {
+                /*background-color: #CCCCBB;*/
+                /*color: white;*/
+                /*background-color: rgb(100,135,220);*/
+		/*background: #80A1FF;*/
+		background: #C3D9FF;
+		margin-top: 0.5em;
+                padding: 0.5em;
+		/*border: solid 1px #6666CC;*/
+		border: solid 1px #6666CC;
+      }
+.otsikkorivi {
+                font-weight: bold;
+               /*background-color: white;*/
+	      }
+.sijoitus_0 { 
+              display: inline;
+               }
+.sijoitus_1 { 
+              display: inline;
+               }
+.sijoitus_1 a { 
+                color: black;
+              display: inline;
+               }
+.sijoitus_2 { 
+               display: inline;
+               }
+.sijoitus_3 { 
+               display: inline;
+               }
+.sijoitus_4 { 
+               display: inline;
+               }
+.sijoitus_None { 
+               display: inline;
+               }
+
+
+.kommentit {
+             background-color: rgb(240,240,240);
+      }
+
+.kommentti {
+             border-top: dotted 2px black;		   
+             padding: 0.5em;
+
+      }
+.kommentti .kommentoija { 
+                  display: inline;
+       }
+.kommentti .pvm { 
+                  display: inline;
+       }
+
+select {
+       }
+
+.sivupalkki {
+	    margin-top: 1em;
+	    margin-right: 1em;
+   float:           right;
+   clear:           both;
+   width:           12.5em;
+   padding: 0.5em;
+   /*border:2px solid black;*/
+   /*background: rgb(100,135,220);*/
+   /*background: #CCCCFF;*/
+   /*border: #000 0.2em solid;*/
+
+
+}
+
+li
+{
+    list-style-type: square;
+    margin-left: -2em;
+}
+
+.sivupalkki h2 a {
+              text-decoration:none;
+              color: #686868;
+}
+ul
+{
+    list-style-type: none;
+    /*margin-left: -3em;*/
+/*border-top:#CCCCCC 1px solid;*/
+		     text-align: left;
+		     margin-top: 0;
+		     padding-top: 0;
+
+
+}
+
+.header {
+   /*background: rgb(100,135,220);*/
+   padding: 0.5em;
+		/*background: #80A1FF;*/
+		background: #C3D9FF;
+		border-bottom: solid 1px #6666CC;
+}
+
+.footer {
+background: #C3D9FF;
+   padding: 0.5em;
+   		border-top: solid 1px #6666CC;
+}
+
+h1, h2, h3 {
+    text-align: left; 
+    font-family: sans-serif;
+}
+
+h2 {
+    font-size: 130%;
+}
+
+table {
+		/*background: #80A1FF;*/
+                padding: 0.5em;
+		/*border: solid 1px #6666CC;*/
+		margin-bottom: 0.5em;
+		margin-top: 0.5em;
+		  font-size: 8.5pt;
+		  border-collapse: collapse;
+		  white-space:nowrap;
+}
+
+th {
+border-bottom: 1px solid;
+}
+
+th, td, tr {
+                    padding-left: 5px;
+                    padding-right: 5px;
+                    margin: 10px;
+                    text-align: left;
+                    white-space:nowrap;
+}
+
+.virhe {
+    margin: 3px;
+    padding: 1em;
+    background-color: #FF6699;
+    border: #000 2px dotted;
+}
