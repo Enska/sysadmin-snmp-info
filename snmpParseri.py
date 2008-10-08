@@ -42,27 +42,27 @@ import string
 import re
 
 class Parser:
-   # Eri html osat, joista tehdaan itse sivu. Nama koootaan yhteen joko tavallisena
-   # html:na tai esim. php:na...
-   html_dir = "/home/tommi/omat/python/snmpinfo/html"
-   # Testausta varten
-   # SNMPv2-MIB::sysName.0 = STRING: byakhee
-   # SNMPv2-MIB::sysLocation.0 = STRING: Kulkee ties missa...
-   # Muuttujia
-   # Testaamiseen
-   # snmpt = ['SNMPv2-MIB::sysName.0 = STRING: byakhee', 'SNMPv2-MIB::sysLocation.0 = STRING: Kulkee ties missa...']
 
-   snmpt = []
+   def __init__(self, db):
+      # Eri html osat, joista tehdaan itse sivu. Nama koootaan yhteen joko tavallisena
+      # html:na tai esim. php:na...
+      self.html_dir = "/home/tommi/omat/python/snmpinfo/html"
+      # Testausta varten
+      # SNMPv2-MIB::sysName.0 = STRING: byakhee
+      # SNMPv2-MIB::sysLocation.0 = STRING: Kulkee ties missa...
+      # Muuttujia
+      # Testaamiseen
+      # snmpt = ['SNMPv2-MIB::sysName.0 = STRING: byakhee', 'SNMPv2-MIB::sysLocation.0 = STRING: Kulkee ties missa...']
+      self.snmpt = []
+
    ##########################
-   # Moduulit
+   # funktiot
    def snmp_vastaus(snmp_tulos) :
       # Kutsutaan yhdella snmp-kyselyn tulosrivilla
       # Palauttaa takaisin snmp-muuttujan nimen ja tuloksen
       osa = re.search('^(.*)::(.*) = (.*): (.*)', snmp_tulos)
       return osa.group(2), osa.group(4)
-
-
-#      kone = tulosparit['sysName.0']
+      # kone = tulosparit['sysName.0']
 
    def koneNimi(lista):
       # Hakee koneen nimen ja palauttaa sen
@@ -100,23 +100,31 @@ class Parser:
 
 
    ###########################
-   #  MAIN
-   try:
-      filu = open('snmp_kyselyt/byakhee.system.txt', 'r')
-   except IOError, err:
-      print 'snmp-tulostiedostoa (%r) ei pystytty avaamaan.' % ('snmp_kyselyt/byakhee.system.txt',), err
-      #return []
-   le = int(0)
-   type(le)
-   testi = {}
-   for li in  filu.readlines() :
-      # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
-      # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
-      # snmpt.append(snmp_vastaus(li))
-      avain, arvo = snmp_vastaus(li)
-      testi[avain] = arvo
-   filu.close()
 
-   # print testi
-   print koneNimi(testi), koneKontakti(testi), koneSijainti(testi)
+class perusTiedot(Parser):
+   def __init__(self):
+      Parser.__init__(self)
+
+   def snmpParseri(self):
+      # Luetaan tiedostot dict-listoiksi
+      try:
+	 filu = open('snmp_kyselyt/byakhee.system.txt', 'r')
+      except IOError, err:
+	 print 'snmp-tulostiedostoa (%r) ei pystytty avaamaan.' % ('snmp_kyselyt/byakhee.system.txt',), err
+	 #return []
+      le = int(0)
+      type(le)
+      testi = {}
+      for li in  filu.readlines() :
+	 # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
+	 # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
+	 # snmpt.append(snmp_vastaus(li))
+	 avain, arvo = snmp_vastaus(li)
+	 testi[avain] = arvo
+      filu.close()
+      # print testi
+      print koneNimi(testi), koneKontakti(testi), koneSijainti(testi)
+      #self.koneNimi(testi)
+      #self.koneKontakti(testi)
+      #self.koneSijainti(testi)
 

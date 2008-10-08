@@ -72,9 +72,12 @@ class Render:
 class TeeKoneLista(Render) :
    def __init__(self):
       Render.__init__(self)
-      self.koneet = koneet
-      snmpParseri.
+      #self.koneet = koneet
       self.header()
+      self.cssStart('tilasto')
+      self.koneet = str(snmpParseri.perusTiedot())
+      print self.koneet
+      self.cssEnd()
       self.footer()
 
    def render(self):
