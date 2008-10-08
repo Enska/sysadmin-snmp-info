@@ -4,7 +4,7 @@
 # Original class author: Petteri Klemola
 # Used and modified with permission for this use.
 #
-# Tommi Ruuth
+# Author: Tommi Ruuth
 #
 
 import sys
@@ -38,7 +38,7 @@ class Render:
         print "<p>Koneet ja niiden tiedot.</p>"
         print "<h2>Koneet</h2>"
         print "<h2>Työkalut</h2>"
-        print "<ul><li>%s</ul>" % self.inUrl('uusipeli', 'Lisää peli')
+        print "<ul><li>%s</ul>" % self.inUrl('Linkki 1', 'Linkki 2')
         self.cssEnd()
         self.cssStart('sisalto')
 
@@ -73,6 +73,7 @@ class TeeKoneLista(Render) :
    def __init__(self):
       Render.__init__(self)
       self.koneet = koneet
+      snmpParseri.
       self.header()
       self.footer()
 
