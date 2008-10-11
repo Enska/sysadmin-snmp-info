@@ -43,7 +43,10 @@ import re
 
 class Parser:
 
-   def __init__(self, db):
+   def __init__(self, hakemisto):
+      # Jos annettaisiin parametrina hakemisto, josta tiedot luettaisiin
+      # Ei tehdä vielä näin...
+      notinuse = hakemisto
       # Eri html osat, joista tehdaan itse sivu. Nama koootaan yhteen joko tavallisena
       # html:na tai esim. php:na...
       self.html_dir = "/home/tommi/omat/python/snmpinfo/html"
@@ -101,11 +104,32 @@ class Parser:
 
    ###########################
 
-class perusTiedot(Parser):
-   def __init__(self):
-      Parser.__init__(self)
+class testi(Parser):
 
-   def snmpParseri(self):
+   def __init__(self, hakemisto):
+      Parser.__init__(self, hakemisto)
+
+   def parser(self, hakemisto):
+      # Testi-funktio
+      print "Testifunktio() -> testi"
+      print "Testataan funktiota: -> ", testi.vastaus(self, hakemisto)
+
+   def vastaus(self, hakemisto):
+      return "jokin string"
+
+class perusTiedot(Parser):
+
+   def __init__(self, hakemisto):
+      Parser.__init__(self, hakemisto)
+
+   def snmp_vastaus(self,snmp_tulos) :
+      # Kutsutaan yhdella snmp-kyselyn tulosrivilla
+      # Palauttaa takaisin snmp-muuttujan nimen ja tuloksen
+      osa = re.search('^(.*)::(.*) = (.*): (.*)', snmp_tulos)
+      return osa.group(2), osa.group(4)
+      # kone = tulosparit['sysName.0']
+
+   def snmpTiedot(self, hakemisto):
       # Luetaan tiedostot dict-listoiksi
       try:
 	 filu = open('snmp_kyselyt/byakhee.system.txt', 'r')
@@ -115,16 +139,24 @@ class perusTiedot(Parser):
       le = int(0)
       type(le)
       testi = {}
-      for li in  filu.readlines() :
+      for li in filu.readlines() :
 	 # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
 	 # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
 	 # snmpt.append(snmp_vastaus(li))
-	 avain, arvo = snmp_vastaus(li)
+	 avain, arvo = snmpParseri.snmp_vastaus(li)
 	 testi[avain] = arvo
       filu.close()
       # print testi
-      print koneNimi(testi), koneKontakti(testi), koneSijainti(testi)
-      #self.koneNimi(testi)
+      """
+      Testi 2
+      """
+
+   def parser(self, hakemisto):
+      lala = snmpParseri.snmpTiedot(self, hakemisto)
+      print "lalal", koneNimi(lala)
+      #print "jokos?", koneNimi(testi), koneKontakti(testi), koneSijainti(testi)
+      # return koneNimi(testi), koneKontakti(testi), koneSijainti(testi)
+      # self.koneNimi(testi)
       #self.koneKontakti(testi)
       #self.koneSijainti(testi)
 

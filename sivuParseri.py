@@ -19,7 +19,8 @@ import snmpParseri
 class Render:
    # Luokka joka rakentelee itse‰‰n kutsumalla nettisivun
 
-    def __init__(self):
+    def __init__(self, koneet):
+        turhake = koneet
         self.cssPrefix = ""
         self.baseUrl0 = 'http://23.fi/Luokka:Linux'
         self.baseUrl = '%s' % self.baseUrl0
@@ -70,13 +71,19 @@ class Render:
         return "<a href=\"%(url)s\">%(text)s</a>" % {'url':url,'text':text}
 
 class TeeKoneLista(Render) :
-   def __init__(self):
-      Render.__init__(self)
+
+   def __init__(self,koneet):
+      Render.__init__(self,koneet)
       #self.koneet = koneet
       self.header()
       self.cssStart('tilasto')
-      self.koneet = str(snmpParseri.perusTiedot())
-      print self.koneet
+      tiedot = snmpParseri.perusTiedot(koneet)
+      print tiedot.parser(koneet), "jokos?"
+      #for i in tiedot:
+      #   print i
+      # print snmpParseri.perusTiedot(koneet)
+      oli = snmpParseri.testi(koneet)
+      print oli.parser(koneet)
       self.cssEnd()
       self.footer()
 
@@ -89,9 +96,10 @@ class TeeKoneLista(Render) :
       # self.footer()
 
 class Error(Render):
-    def __init__(self, text, db):
+
+    def __init__(self, text):
         self.text = text
-        Render.__init__(self, db)
+        Render.__init__(self, jotain)
         self.prefix = [
             'Ongelmia j‰sennyksess‰',
             'K‰rp‰nen',
@@ -103,6 +111,7 @@ class Error(Render):
             'Voi vittu',
             'Nyt ei oikein n‰yt‰ sujuvan, ehk‰ sun kannatais menn‰ muualle'
             ]
+
     def render(self):
         self.header()
         self.cssClass("<b>%s:</b> %s" % (random.choice(self.prefix), self.text), 'virhe')

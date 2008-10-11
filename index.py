@@ -22,8 +22,9 @@ if os.environ.has_key('PATH_INFO'):
 
 urls = {}
 fs = cgi.FieldStorage(keep_blank_values=1)
+snmp = "testi"
 
-urls['koneet'] = sivuParseri.TeeKoneLista()
+urls['koneet'] = sivuParseri.TeeKoneLista(snmp)
 
 
 
