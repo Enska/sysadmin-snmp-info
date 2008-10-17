@@ -78,7 +78,7 @@ class TeeKoneLista(Render) :
       self.header()
       self.cssStart('tilasto')
       tiedot = snmpParseri.perusTiedot(koneet)
-      print tiedot.parser(koneet), "jokos?"
+      print "1. ->", tiedot.parser(koneet), "<- jokos?"
       #for i in tiedot:
       #   print i
       # print snmpParseri.perusTiedot(koneet)

@@ -43,10 +43,10 @@ import re
 
 class Parser:
 
-   def __init__(self, hakemisto):
+   def __init__(self, nimi):
       # Jos annettaisiin parametrina hakemisto, josta tiedot luettaisiin
       # Ei tehd‰ viel‰ n‰in...
-      notinuse = hakemisto
+      self.nimi = nimi
       # Eri html osat, joista tehdaan itse sivu. Nama koootaan yhteen joko tavallisena
       # html:na tai esim. php:na...
       self.html_dir = "/home/tommi/omat/python/snmpinfo/html"
@@ -60,18 +60,18 @@ class Parser:
 
    ##########################
    # funktiot
-   def snmp_vastaus(snmp_tulos) :
+   def snmp_vastaus(self, snmp_tulos) :
       # Kutsutaan yhdella snmp-kyselyn tulosrivilla
       # Palauttaa takaisin snmp-muuttujan nimen ja tuloksen
       osa = re.search('^(.*)::(.*) = (.*): (.*)', snmp_tulos)
       return osa.group(2), osa.group(4)
       # kone = tulosparit['sysName.0']
 
-   def koneNimi(lista):
+   def koneNimi(self,lista):
       # Hakee koneen nimen ja palauttaa sen
       return lista.get('sysName.0', 'Arvoa ei ollut')
 
-   def koneKontakti(lista):
+   def koneKontakti(self,lista):
       # Hakee koneen kontaktitiedot ja palauttaa sen
       return lista.get('sysContact.0', 'Arvoa ei ollut')
 
@@ -106,8 +106,8 @@ class Parser:
 
 class testi(Parser):
 
-   def __init__(self, hakemisto):
-      Parser.__init__(self, hakemisto)
+   def __init__(self, nimi):
+      Parser.__init__(self, nimi)
 
    def parser(self, hakemisto):
       # Testi-funktio
@@ -117,46 +117,31 @@ class testi(Parser):
    def vastaus(self, hakemisto):
       return "jokin string"
 
-class perusTiedot(Parser):
-
-   def __init__(self, hakemisto):
-      Parser.__init__(self, hakemisto)
-
-   def snmp_vastaus(self,snmp_tulos) :
-      # Kutsutaan yhdella snmp-kyselyn tulosrivilla
-      # Palauttaa takaisin snmp-muuttujan nimen ja tuloksen
-      osa = re.search('^(.*)::(.*) = (.*): (.*)', snmp_tulos)
-      return osa.group(2), osa.group(4)
-      # kone = tulosparit['sysName.0']
-
-   def snmpTiedot(self, hakemisto):
+   def teeLista(self, lahdeHakemisto, listaNimi):
+      # Tama funktio tekee listan tuloksista jota sitten k‰pistell‰‰n
       # Luetaan tiedostot dict-listoiksi
+
       try:
 	 filu = open('snmp_kyselyt/byakhee.system.txt', 'r')
       except IOError, err:
 	 print 'snmp-tulostiedostoa (%r) ei pystytty avaamaan.' % ('snmp_kyselyt/byakhee.system.txt',), err
 	 #return []
-      le = int(0)
-      type(le)
-      testi = {}
+      lista = {}
       for li in filu.readlines() :
 	 # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
 	 # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
 	 # snmpt.append(snmp_vastaus(li))
-	 avain, arvo = snmpParseri.snmp_vastaus(li)
-	 testi[avain] = arvo
+	 avain, arvo = perusTiedot.snmpVastaus(self,li)
+	 lista[avain] = arvo
       filu.close()
-      # print testi
-      """
-      Testi 2
-      """
+      print Parser.koneNimi(self,lala) , "snmp tuloksia..."
 
-   def parser(self, hakemisto):
-      lala = snmpParseri.snmpTiedot(self, hakemisto)
-      print "lalal", koneNimi(lala)
-      #print "jokos?", koneNimi(testi), koneKontakti(testi), koneSijainti(testi)
-      # return koneNimi(testi), koneKontakti(testi), koneSijainti(testi)
-      # self.koneNimi(testi)
-      #self.koneKontakti(testi)
-      #self.koneSijainti(testi)
+
+   def snmpVastaus(self,snmptulos) :
+      # Kutsutaan yhdella snmp-kyselyn tulosrivilla
+      # Palauttaa takaisin snmp-muuttujan nimen ja tuloksen
+      osa = re.search('^(.*)::(.*) = (.*): (.*)', snmptulos)
+      return osa.group(2), osa.group(4)
+      # kone = tulosparit['sysName.0']
+
 
