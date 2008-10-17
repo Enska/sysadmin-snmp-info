@@ -56,24 +56,46 @@ class Parser:
       # Muuttujia
       # Testaamiseen
       # snmpt = ['SNMPv2-MIB::sysName.0 = STRING: byakhee', 'SNMPv2-MIB::sysLocation.0 = STRING: Kulkee ties missa...']
-      self.snmpt = []
+      self.kokolista =  {}
+      self.kokolista = self.teeLista("lahdeHakemisto")
+
 
    ##########################
-   # funktiot
-   def snmp_vastaus(self, snmp_tulos) :
+   # perusfunktiot
+
+   def teeLista(self, lahdeHakemisto):
+      # Tama funktio tekee listan tuloksista jota sitten k‰pistell‰‰n
+      # Luetaan tiedostot dict-listoiksi
+
+      try:
+	 filu = open('snmp_kyselyt/byakhee.system.txt', 'r')
+      except IOError, err:
+	 print 'snmp-tulostiedostoa (%r) ei pystytty avaamaan.' % ('snmp_kyselyt/byakhee.system.txt',), err
+	 #return []
+      self.lista = {}
+      for li in filu.readlines() :
+	 # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
+	 # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
+	 # snmpt.append(snmp_vastaus(li))
+	 avain, arvo = self.snmpVastaus(li)
+	 self.lista[avain] = arvo
+      filu.close()
+      return self.lista
+
+   def snmpVastaus(self,snmptulos) :
       # Kutsutaan yhdella snmp-kyselyn tulosrivilla
       # Palauttaa takaisin snmp-muuttujan nimen ja tuloksen
-      osa = re.search('^(.*)::(.*) = (.*): (.*)', snmp_tulos)
+      osa = re.search('^(.*)::(.*) = (.*): (.*)', snmptulos)
       return osa.group(2), osa.group(4)
       # kone = tulosparit['sysName.0']
 
-   def koneNimi(self,lista):
+   def koneNimi(self):
       # Hakee koneen nimen ja palauttaa sen
-      return lista.get('sysName.0', 'Arvoa ei ollut')
+      return self.kokolista['sysName.0']
 
-   def koneKontakti(self,lista):
+   def koneKontakti(self):
       # Hakee koneen kontaktitiedot ja palauttaa sen
-      return lista.get('sysContact.0', 'Arvoa ei ollut')
+      return self.kokolista['sysContact.0']
 
    def koneSijainti(lista):
       # Hakee koneen sijainnin ja palauttaa sen
@@ -101,47 +123,7 @@ class Parser:
       # Hakee koneen nimen ja palauttaa sen
       return lista.get('sysContact.0', 'Arvoa ei ollut')
 
-
-   ###########################
-
-class testi(Parser):
-
-   def __init__(self, nimi):
-      Parser.__init__(self, nimi)
-
-   def parser(self, hakemisto):
-      # Testi-funktio
-      print "Testifunktio() -> testi"
-      print "Testataan funktiota: -> ", testi.vastaus(self, hakemisto)
-
    def vastaus(self, hakemisto):
       return "jokin string"
-
-   def teeLista(self, lahdeHakemisto, listaNimi):
-      # Tama funktio tekee listan tuloksista jota sitten k‰pistell‰‰n
-      # Luetaan tiedostot dict-listoiksi
-
-      try:
-	 filu = open('snmp_kyselyt/byakhee.system.txt', 'r')
-      except IOError, err:
-	 print 'snmp-tulostiedostoa (%r) ei pystytty avaamaan.' % ('snmp_kyselyt/byakhee.system.txt',), err
-	 #return []
-      lista = {}
-      for li in filu.readlines() :
-	 # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
-	 # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
-	 # snmpt.append(snmp_vastaus(li))
-	 avain, arvo = perusTiedot.snmpVastaus(self,li)
-	 lista[avain] = arvo
-      filu.close()
-      print Parser.koneNimi(self,lala) , "snmp tuloksia..."
-
-
-   def snmpVastaus(self,snmptulos) :
-      # Kutsutaan yhdella snmp-kyselyn tulosrivilla
-      # Palauttaa takaisin snmp-muuttujan nimen ja tuloksen
-      osa = re.search('^(.*)::(.*) = (.*): (.*)', snmptulos)
-      return osa.group(2), osa.group(4)
-      # kone = tulosparit['sysName.0']
 
 

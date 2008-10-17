@@ -24,6 +24,7 @@ urls = {}
 fs = cgi.FieldStorage(keep_blank_values=1)
 snmp = "testi"
 
+
 urls['koneet'] = sivuParseri.TeeKoneLista(snmp)
 
 

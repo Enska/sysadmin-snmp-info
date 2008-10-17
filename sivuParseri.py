@@ -77,13 +77,14 @@ class TeeKoneLista(Render) :
       #self.koneet = koneet
       self.header()
       self.cssStart('tilasto')
-      tiedot = snmpParseri.perusTiedot(koneet)
-      print "1. ->", tiedot.parser(koneet), "<- jokos?"
+
+      tiedot = snmpParseri.Parser(koneet)
+      print "Kone", tiedot.koneNimi()
       #for i in tiedot:
       #   print i
       # print snmpParseri.perusTiedot(koneet)
-      oli = snmpParseri.testi(koneet)
-      print oli.parser(koneet)
+      #oli = snmpParseri.testi(koneet)
+      #print oli.parser(koneet)
       self.cssEnd()
       self.footer()
 
