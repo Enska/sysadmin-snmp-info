@@ -78,8 +78,14 @@ class TeeKoneLista(Render) :
       self.header()
       self.cssStart('tilasto')
 
+      # Luetaan l‰pi hakemisto, jossa tulosfilut ovat ja k‰sitell‰‰n
+      # snmpParseri luokalla halutut filukkeet.
+      # TODO
+
+
+      # Nyt k‰sitell‰‰n vain yksi tulostiedosto.
       tiedot = snmpParseri.Parser(koneet)
-      print "Kone", tiedot.koneNimi()
+      print "Kone ", tiedot.koneNimi()
       #for i in tiedot:
       #   print i
       # print snmpParseri.perusTiedot(koneet)

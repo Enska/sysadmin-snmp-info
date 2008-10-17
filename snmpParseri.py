@@ -99,7 +99,7 @@ class Parser:
 
    def koneSijainti(lista):
       # Hakee koneen sijainnin ja palauttaa sen
-      return lista.get('sysLocation.0', 'Arvoa ei ollut')
+      return self.kokolista['sysLocation.0']
 
    def koneVerkko(lista):
       # Hakee koneen eri verkkoliittymät ja palauttaa ne
