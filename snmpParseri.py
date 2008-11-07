@@ -73,11 +73,11 @@ class Parser:
 	 print 'snmp-tulostiedostoa (%r) ei pystytty avaamaan.' % ('snmp_kyselyt/byakhee.system.txt',), err
 	 #return []
       self.lista = {}
-      for li in filu.readlines() :
+      for livi in filu.readlines() :
 	 # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
 	 # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
 	 # snmpt.append(snmp_vastaus(li))
-	 avain, arvo = self.snmpVastaus(li)
+	 avain, arvo = self.snmpVastaus(livi)
 	 self.lista[avain] = arvo
       filu.close()
       return self.lista
@@ -91,33 +91,35 @@ class Parser:
 
    def koneNimi(self):
       # Hakee koneen nimen ja palauttaa sen
-      return self.kokolista['sysName.0']
+      return self.kokolista.get('sysName.0', 'Arvoa ei ollut')
 
    def koneKontakti(self):
       # Hakee koneen kontaktitiedot ja palauttaa sen
-      return self.kokolista['sysContact.0']
+      return self.kokolista.get('sysContact.0', 'Arvoa ei ollut')
 
-   def koneSijainti(lista):
+   def koneSijainti(self):
       # Hakee koneen sijainnin ja palauttaa sen
-      return self.kokolista['sysLocation.0']
+      return self.kokolista.get('sysLocation.0', 'Arvoa ei ollut')
 
-   def koneVerkko(lista):
+   def koneVerkko(self):
       # Hakee koneen eri verkkoliittymät ja palauttaa ne
-      return lista.get('sysContact.0', 'Arvoa ei ollut')
+      # TODO
+      # Looppi usealla liittymälle
+      return self.kokolista.get('sysContact.0', 'Arvoa ei ollut')
 
-   def koneIpt(lista):
+   def koneIpt(self):
       # Hakee koneen ipt (poislukien localhost) ja palauttaa sen
-      return lista.get('sysContact.0', 'Arvoa ei ollut')
+      return self.kokolista.get('sysContact.0', 'Arvoa ei ollut')
 
-   def koneMuisti(lista):
+   def koneMuisti(self):
       # Hakee koneen fyysisen muistin määrän ja palauttaa sen
       # pitää hakea oikea muuttuja ->  HOST-RESOURCES-MIB::hrStorageDescr.1 = STRING: Physical memory
       # Ja tämä avulla oikea lukuarvo -> HOST-RESOURCES-MIB::hrStorageSize.1 = INTEGER: 2062168
-      return lista.get('.0', 'Arvoa ei ollut')
+      return self.kokolista.get('.0', 'Arvoa ei ollut')
 
-   def koneJoku1(lista):
+   def koneJoku1(self):
       # Hakee koneen nimen ja palauttaa sen
-      return lista.get('sysContact.0', 'Arvoa ei ollut')
+      return self.lista.get('sysContact.0', 'Arvoa ei ollut')
 
    def koneJoku2(lista):
       # Hakee koneen nimen ja palauttaa sen

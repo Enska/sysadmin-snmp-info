@@ -6,6 +6,13 @@
 #
 # Saatu luvalla, otettu käyttöön soveltuvin osin ja muokattu edelleen. -TR 20081002
 #
+
+# TODO
+# -snmpkyselyt -> ehkä cron-skripti?
+# -asetusten hallinta ja taltiointi
+# -
+# -
+
 #import sys
 import cgi
 import os
@@ -13,6 +20,13 @@ import cgitb; cgitb.enable()
 # Oma luokka, lainattu paaosin Petteri Klemolalta
 import sivuParseri
 
+# Maaritellaan muutama hakemisto. joissa filuja pyöritellään
+# Perushakemisto, jossa ollaan
+#curdir=
+# Jos tarvitaan temp-hakemistoa
+#tmpdir=
+# snmp-kyselyuden tuloksialle hakemisto
+#snmpdir=
 
 sivu = ""
 # handle the urls

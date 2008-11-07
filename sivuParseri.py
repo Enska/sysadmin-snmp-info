@@ -10,6 +10,8 @@
 import sys
 import datetime
 import random
+import struct
+import dircache
 # Omat luokat:
 # import dbHandler
 # import utils
@@ -80,12 +82,16 @@ class TeeKoneLista(Render) :
 
       # Luetaan l‰pi hakemisto, jossa tulosfilut ovat ja k‰sitell‰‰n
       # snmpParseri luokalla halutut filukkeet.
-      # TODO
-
-
+      # TODO:
+      # -teht‰v‰ config luokka/parseri, joka otetaan mukaan import:lla?
+      kojeet = self.lueFilut("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      print "Debug: kojeet: ", kojeet
+      for ind in kojeet:
+	 tiedot = snmpParseri.Parser(ind)
+	 print "Kone:", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko()
       # Nyt k‰sitell‰‰n vain yksi tulostiedosto.
-      tiedot = snmpParseri.Parser(koneet)
-      print "Kone ", tiedot.koneNimi()
+      #tiedot = snmpParseri.Parser(koneet)
+      #print "Kone :", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko()
       #for i in tiedot:
       #   print i
       # print snmpParseri.perusTiedot(koneet)
@@ -101,6 +107,31 @@ class TeeKoneLista(Render) :
       print "<p> kone 1 </p>"
       self.cssEnd()
       # self.footer()
+
+   def lueFilut(self, hakemisto):
+      # Lukee hakemistossa olevien tiedostojen nimet ja polut talteen
+      filukkeet = hakemisto
+      print "Debug: lueFilut() -> parametri: hakemisto -> ", hakemisto
+      try:
+	 snmpfilut = dircache.listdir(hakemisto)
+	 snmpfilut = snmpfilut[:]
+	 print "Debug: lueFilut() -> dircache -> tulos: ", snmpfilut
+	 # Saadaan parametrina hakemisto
+	 #filut = open('hakemisto', 'r')
+	 #filut = open("*")
+         #self.snmpfilut = {}
+         #ji = 0
+         #for rivi in filut :
+	  #snmpfilut[ji] = rivi
+	  #ji + 1
+	  #print "Debug: lueFilut -> tulostiedosto ->", li
+         #filut.close()
+      except IOError, err:
+	 # print 'snmp-tuloshakemistoa (%r) ei pystytty avaamaan.' % ('snmp_kyselyt/byakhee.system.txt',), err
+ 	 print 'snmp-tuloshakemistoa (%r) ei pystytty avaamaan.' % ('hakemisto',), err
+
+      return snmpfilut
+      #return self.lista
 
 class Error(Render):
 
