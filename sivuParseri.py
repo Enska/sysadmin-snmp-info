@@ -60,6 +60,9 @@ class Render:
     def cssEnd(self):
         print "</div>"
 
+    def lB(self):
+        print "<br>"
+
     def formatText(self, text):
         text = str(text)
         return text.replace('\r\n','<br />')
@@ -85,10 +88,10 @@ class TeeKoneLista(Render) :
       # TODO:
       # -tehtävä config luokka/parseri, joka otetaan mukaan import:lla?
       kojeet = self.lueFilut("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
-      print "Debug: kojeet: ", kojeet
+      # print "Debug: kojeet: ", kojeet, self.lB()
       for ind in kojeet:
 	 tiedot = snmpParseri.Parser(ind)
-	 print "Kone:", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko()
+	 print "Kone tiedot:", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko(), self.lB()
       # Nyt käsitellään vain yksi tulostiedosto.
       #tiedot = snmpParseri.Parser(koneet)
       #print "Kone :", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko()
@@ -111,26 +114,21 @@ class TeeKoneLista(Render) :
    def lueFilut(self, hakemisto):
       # Lukee hakemistossa olevien tiedostojen nimet ja polut talteen
       filukkeet = hakemisto
-      print "Debug: lueFilut() -> parametri: hakemisto -> ", hakemisto
+      # print "Debug: lueFilut() -> parametri: hakemisto -> ", hakemisto
       try:
-	 snmpfilut = dircache.listdir(hakemisto)
-	 snmpfilut = snmpfilut[:]
-	 print "Debug: lueFilut() -> dircache -> tulos: ", snmpfilut
-	 # Saadaan parametrina hakemisto
-	 #filut = open('hakemisto', 'r')
-	 #filut = open("*")
-         #self.snmpfilut = {}
-         #ji = 0
-         #for rivi in filut :
-	  #snmpfilut[ji] = rivi
-	  #ji + 1
-	  #print "Debug: lueFilut -> tulostiedosto ->", li
-         #filut.close()
+	 snmpfilut1 = dircache.listdir(hakemisto)
+	 snmpfilut1 = snmpfilut1[:]  # jotta voidaan muokata listaa
+	 # print "Debug: lueFilut() -> dircache -> tulos2: ", snmpfilut1
+	 snmpfilut2 = []
+	 for fil in snmpfilut1:
+	    withdir = hakemisto + '/' + fil
+	    # print "Debug: koko -> ",withdir
+	    snmpfilut2.insert(snmpfilut1.index(fil), hakemisto + '/' + fil)
+	 # print "Debug: lueFilut() -> dircache -> tulos3: ", snmpfilut2
       except IOError, err:
-	 # print 'snmp-tuloshakemistoa (%r) ei pystytty avaamaan.' % ('snmp_kyselyt/byakhee.system.txt',), err
  	 print 'snmp-tuloshakemistoa (%r) ei pystytty avaamaan.' % ('hakemisto',), err
 
-      return snmpfilut
+      return snmpfilut2
       #return self.lista
 
 class Error(Render):

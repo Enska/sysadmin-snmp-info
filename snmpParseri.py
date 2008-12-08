@@ -44,9 +44,10 @@ import re
 class Parser:
 
    def __init__(self, nimi):
-      # Jos annettaisiin parametrina hakemisto, josta tiedot luettaisiin
-      # Ei tehdä vielä näin...
+      # Annetaan parametrina tiedosto, josta tiedot luetaan. Kutsujan tehtävänä
+      # on huolehtia, että parametri todella on tiedosto.
       self.nimi = nimi
+      # print "Debug: snmpParseri -> __init__ -> nimi -> ", nimi
       # Eri html osat, joista tehdaan itse sivu. Nama koootaan yhteen joko tavallisena
       # html:na tai esim. php:na...
       self.html_dir = "/home/tommi/omat/python/snmpinfo/html"
@@ -57,29 +58,31 @@ class Parser:
       # Testaamiseen
       # snmpt = ['SNMPv2-MIB::sysName.0 = STRING: byakhee', 'SNMPv2-MIB::sysLocation.0 = STRING: Kulkee ties missa...']
       self.kokolista =  {}
-      self.kokolista = self.teeLista("lahdeHakemisto")
+      self.kokolista = self.teeLista(nimi)
 
 
    ##########################
    # perusfunktiot
 
-   def teeLista(self, lahdeHakemisto):
+   def teeLista(self, lahdeTiedosto):
       # Tama funktio tekee listan tuloksista jota sitten käpistellään
       # Luetaan tiedostot dict-listoiksi
+      # print "Debug: dirikka ->", lahdeTiedosto
+      self.lista = {}
 
       try:
-	 filu = open('snmp_kyselyt/byakhee.system.txt', 'r')
+	 filu = open(lahdeTiedosto, 'r')
+         for livi in filu.readlines() :
+	     # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
+	     # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
+	     # snmpt.append(snmp_vastaus(li))
+	     avain, arvo = self.snmpVastaus(livi)
+	     self.lista[avain] = arvo
+	     filu.close()
       except IOError, err:
-	 print 'snmp-tulostiedostoa (%r) ei pystytty avaamaan.' % ('snmp_kyselyt/byakhee.system.txt',), err
+	 print 'snmp-tulostiedostoa (%r) ei pystytty avaamaan.' % (lahdeTiedosto,), err
 	 #return []
-      self.lista = {}
-      for livi in filu.readlines() :
-	 # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
-	 # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
-	 # snmpt.append(snmp_vastaus(li))
-	 avain, arvo = self.snmpVastaus(livi)
-	 self.lista[avain] = arvo
-      filu.close()
+
       return self.lista
 
    def snmpVastaus(self,snmptulos) :
