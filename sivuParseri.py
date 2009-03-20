@@ -89,9 +89,16 @@ class TeeKoneLista(Render) :
       # -teht‰v‰ config luokka/parseri, joka otetaan mukaan import:lla?
       kojeet = self.lueFilut("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
       # print "Debug: kojeet: ", kojeet, self.lB()
+
+      # This one needs to be changed. We want to have as return a hash-list?
+      bigList =  {}
       for ind in kojeet:
 	 tiedot = snmpParseri.Parser(ind)
+	 bigList[ind] = tiedot
 	 print "Kone tiedot:", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko(), self.lB()
+
+      # Might not work...
+      bigList(0).koneNimi()
       # Nyt k‰sitell‰‰n vain yksi tulostiedosto.
       #tiedot = snmpParseri.Parser(koneet)
       #print "Kone :", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko()
