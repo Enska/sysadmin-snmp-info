@@ -60,8 +60,29 @@ class Render:
     def cssEnd(self):
         print "</div>"
 
+    def tableStart(self):
+        print "</table>"
+
+    def tableClStart(self):
+        print "<tr>"
+
+    def tableClEnd(self):
+        print "</tr>"
+
+    def tableSStart(self):
+        print "</div>"
+
+    def tableSEnd(self):
+        print "</div>"
+
+    def tableEnd(self):
+        print "</table>"
+
     def lB(self):
         print "<br>"
+
+    def objDiv(self):
+        print " : "
 
     def formatText(self, text):
         text = str(text)
@@ -76,12 +97,16 @@ class Render:
         return "<a href=\"%(url)s\">%(text)s</a>" % {'url':url,'text':text}
 
 class TeeKoneLista(Render) :
+   # This class creates a page, wwhich we show to user.
 
    def __init__(self,koneet):
+      # Basic init-method. This is used on creation.
       Render.__init__(self,koneet)
       #self.koneet = koneet
       self.header()
-      self.cssStart('tilasto')
+
+      # This seems to be useless at the moment
+      # self.cssStart('tilasto')
 
       # Luetaan l‰pi hakemisto, jossa tulosfilut ovat ja k‰sitell‰‰n
       # snmpParseri luokalla halutut filukkeet.
@@ -91,16 +116,37 @@ class TeeKoneLista(Render) :
       # print "Debug: kojeet: ", kojeet, self.lB()
 
       # This one needs to be changed. We want to have as return a hash-list?
-      bigList =  {}
-      for ind in kojeet:
-	 tiedot = snmpParseri.Parser(ind)
-	 bigList[ind] = tiedot
-	 print "Kone tiedot:", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko(), self.lB()
+      # bigList =  {}
+      #for ind in kojeet:
+	 # tiedot = snmpParseri.Parser(ind)
+	 # bigList[ind] = tiedot
+	 # print "Kone tiedot:", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko(), self.lB()
+	 # print "Kone tiedot:", bigList.koneNimiInd(ind), bigList.koneSijaintiInd(ind), bigList.koneVerkkoInd(ind)
+	 #, self.lB()
+      # Lets end this part, then create a table for results
+      self.cssEnd()
+      self.cssStart('kuvaus')
 
-      # Might not work...
-      bigList(0).koneNimi()
-      # Nyt k‰sitell‰‰n vain yksi tulostiedosto.
-      #tiedot = snmpParseri.Parser(koneet)
+
+      bigList = snmpParseri.Parser(kojeet)
+      # This is the way to call object-lists...
+
+      cou = 0
+      for i in kojeet:
+	 # This actually creates the machinelist
+	 # TODO: The list should be a list of links on underpages, which
+	 # contain detailed information about the machine
+         # print "Kone ",cou + 1,": ", bigList.machineNameInd(cou), bigList.machineLocationInd(cou)
+	 self.addName(bigList.machineNameInd(cou))
+	 self.addBasicInfo(bigList, cou)
+	 self.lB()
+
+
+	 cou = cou + 1
+
+      # And this works
+      # print "Debug: result: ", bigList.koneNimiInd(0)
+
       #print "Kone :", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko()
       #for i in tiedot:
       #   print i
@@ -109,6 +155,35 @@ class TeeKoneLista(Render) :
       #print oli.parser(koneet)
       self.cssEnd()
       self.footer()
+
+   def addName(self, machineName):
+      # self.header()
+      # koneet = self.koneet
+      self.cssStart('tilasto')
+      print machineName
+      self.cssEnd()
+      # self.footer()
+
+   def addBasicInfo(self,machineName, ind):
+      # self.header()
+      # koneet = self.koneet
+      self.cssStart('tilasto')
+      print "<p> "
+      print machineName.machineNameInd(ind)
+      print self.objDiv()
+      print "param: ", machineName," ind -> ", ind
+      print machineName.machineLocationInd(ind)
+      print "lalalal"
+      print self.objDiv()
+      print machineName.machineContactInd(ind)
+      print self.objDiv()
+      print machineName.machineNetworkInd(ind)
+      print self.objDiv()
+      # print machineName.printAll(ind)
+      print " </p>"
+      self.cssEnd()
+      # self.footer()
+
 
    def render(self):
       # self.header()

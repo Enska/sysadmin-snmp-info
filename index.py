@@ -39,6 +39,7 @@ fs = cgi.FieldStorage(keep_blank_values=1)
 snmp = "testi"
 
 
+# Here we call the method to create a TeeKoneLista object, which has the information in
 urls['koneet'] = sivuParseri.TeeKoneLista(snmp)
 
 

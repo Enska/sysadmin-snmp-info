@@ -43,10 +43,10 @@ import re
 
 class Parser:
 
-   def __init__(self, nimi):
-      # Annetaan parametrina tiedosto, josta tiedot luetaan. Kutsujan tehtävänä
-      # on huolehtia, että parametri todella on tiedosto.
-      self.nimi = nimi
+   def __init__(self, sourceDirectory):
+      # @param: The directry of the source-files
+      # This one is mandatory. -> TODO: check the param
+      self.nimi = sourceDirectory
       # print "Debug: snmpParseri -> __init__ -> nimi -> ", nimi
       # Eri html osat, joista tehdaan itse sivu. Nama koootaan yhteen joko tavallisena
       # html:na tai esim. php:na...
@@ -57,12 +57,42 @@ class Parser:
       # Muuttujia
       # Testaamiseen
       # snmpt = ['SNMPv2-MIB::sysName.0 = STRING: byakhee', 'SNMPv2-MIB::sysLocation.0 = STRING: Kulkee ties missa...']
-      self.kokolista =  {}
-      self.kokolista = self.teeLista(nimi)
+
+      # This we shouldnt need, we returned list is allready a hash-list.
+      self.bigList =  {}
+      cou = 0
+
+      for sourceFile in sourceDirectory:
+	 # Actually nimi is a directory
+	 self.bigList[cou] = self.doOneMachineList(sourceFile)
+	 # print "Debug: one result (",cou,"): ", self.bigList[cou], "\n"
+         cou = cou + 1
 
 
    ##########################
    # perusfunktiot
+
+   def doOneMachineList(self, sourceDir):
+      # Tama funktio tekee listan tuloksista jota sitten käpistellään
+      # Luetaan tiedostot dict-listoiksi
+      # print "Debug: dirikka ->", lahdeTiedosto
+      try:
+	 filu = open(sourceDir, 'r')
+	 self.lista = {}
+         for livi in filu.readlines() :
+	     # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
+	     # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
+	     # snmpt.append(snmp_vastaus(li))
+	     avain, arvo = self.snmpVastaus(livi)
+	     self.lista[avain] = arvo
+         filu.close()
+      except IOError, err:
+	 print 'snmp-t9ulostiedostoa (%r) ei pystytty avaamaan.' % (lahdeTiedosto,), err
+	 #return []
+
+      return self.lista
+
+
 
    def teeLista(self, lahdeTiedosto):
       # Tama funktio tekee listan tuloksista jota sitten käpistellään
@@ -96,19 +126,56 @@ class Parser:
       # Hakee koneen nimen ja palauttaa sen
       return self.kokolista.get('sysName.0', 'Arvoa ei ollut')
 
+   def machineNameInd(self,ind):
+      # Hakee koneen nimen ja palauttaa sen
+      return self.bigList[ind].get('sysName.0', 'Arvoa ei ollut')
+
    def koneKontakti(self):
       # Hakee koneen kontaktitiedot ja palauttaa sen
       return self.kokolista.get('sysContact.0', 'Arvoa ei ollut')
+
+   def machineContactInd(self,ind):
+      # Hakee koneen kontaktitiedot ja palauttaa sen
+      return self.bigList[ind].get('sysContact.0', 'Arvoa ei ollut')
 
    def koneSijainti(self):
       # Hakee koneen sijainnin ja palauttaa sen
       return self.kokolista.get('sysLocation.0', 'Arvoa ei ollut')
 
-   def koneVerkko(self):
-      # Hakee koneen eri verkkoliittymät ja palauttaa ne
+   def machineLocationInd(self,ind):
+      # Hakee koneen sijainnin ja palauttaa sen
+      return self.bigList[ind].get('sysLocation.0', 'Arvoa ei ollut')
+
+   # These are handled by the snmp-index number.
+   def machineNetworkInd(self, ind):
+      # Asks all the network interfaces from the method, then return this as a list
       # TODO
-      # Looppi usealla liittymälle
-      return self.kokolista.get('sysContact.0', 'Arvoa ei ollut')
+      # Loop the multiple network connections.
+      #
+      nw = {}
+      coun =1
+      lele = "tyhja muuttuja"
+      print "testi 2 ->", self.bigList[ind].get('ifIndex.1', "Ei osunut!")
+      for i in (self.bigList[ind]):
+	 # ehk = 'ifIndex.' + str (coun)
+	 ehk = 'ifIndex.2'
+	 # print "pituus -> ", len(ehk)
+	 oliko = self.bigList[ind].get(ehk, "ei ollut")
+	 joku = "testi" + "lisaa"
+	 print "oliko ->", oliko, ". ehk ->",ehk,"<-", "->", joku,"<-"
+	 if (self.bigList[ind].get('ehk', "") ) :
+	    nw[coun] = self.bigList[ind].get('ehk', coun)
+	    # nw[coun] = self.bigList[ind].get('ifIndex.%s', coun)
+	    coun = coun + 1
+	    jep = self.bigList[ind].get('ehk', coun)
+	    print "Testi -> ",jep, "ja -> ", ehk
+      for i in (nw) :
+      # if (self.bigList[ind].get('ifIndex.%s', coun, 'jep')):
+	 lele = lele + str (self.bigList[ind].get('ifIndex.%s', nw[i]))
+	 coun = coun + 1
+         # return "jejeje"
+	 # self.bigList[ind].get('idIndex', 'Arvoa ei ollut')
+      return lele
 
    def koneIpt(self):
       # Hakee koneen ipt (poislukien localhost) ja palauttaa sen
@@ -132,3 +199,10 @@ class Parser:
       return "jokin string"
 
 
+   def printAll(self, ind):
+       # print the whole list, dont return anything.
+       # ONLY for testing!
+       cou=1
+       for i in self.bigList[ind] :
+	  print "Koneindeksi:", ind, " -> avain:", i, " ->  arvo:", self.bigList[ind].get(i, 'none')
+	  cou= cou + 1
