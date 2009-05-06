@@ -153,25 +153,39 @@ class Parser:
       # Loop the multiple network connections.
       #
       nw = {}
-      coun =1
-      lele = "tyhja muuttuja"
-      print "testi 2 ->", self.bigList[ind].get('ifIndex.1', "Ei osunut!")
-      for i in (self.bigList[ind]):
+      coun = 1
+      lele = ""
+      # print "testi 2 ->", self.bigList[ind].get('ifIndex.1', "null hits!")
+      ehk = 'ifIndex.' + str (coun)
+      while ( ( self.bigList[ind].get(ehk, "0")) != "0") :
+	 idf = 'ifDescr.' + str (coun)
+	 ipa = 'ifPhysAddress.' + str (coun)
+	 ias = 'ifAdminStatus.' + str (coun)
+	 ios = 'ifOperStatus.' + str (coun)
+	 # print "idf (", coun, ")-> ", self.bigList[ind].get(idf, "-1")
+	 # print "ipa (", coun, ")-> ", self.bigList[ind].get(ipa, "-1")
+	 # print "ias (", coun, ")-> ", self.bigList[ind].get(ias, "-1")
+	 # print "ios (", coun, ")-> ", self.bigList[ind].get(ios, "-1")
+	 # print "ehk (", coun, ")-> ", ehk, "Res -> ", self.bigList[ind].get(ehk, "0")
+	 result = self.bigList[ind].get(idf, "zero") + " : " + self.bigList[ind].get(ipa, "zero") + " : " + self.bigList[ind].get(ias, "zero") + " : " + self.bigList[ind].get(ios, "zero")
+	 # nw[coun] = self.bigList[ind].get('ehk', coun)
+	 nw[coun] = result
+	 coun = coun + 1
+	 ehk = 'ifIndex.' + str (coun)
+
+      # for i in (self.bigList[ind]):
 	 # ehk = 'ifIndex.' + str (coun)
-	 ehk = 'ifIndex.2'
-	 # print "pituus -> ", len(ehk)
-	 oliko = self.bigList[ind].get(ehk, "ei ollut")
-	 joku = "testi" + "lisaa"
-	 print "oliko ->", oliko, ". ehk ->",ehk,"<-", "->", joku,"<-"
-	 if (self.bigList[ind].get('ehk', "") ) :
-	    nw[coun] = self.bigList[ind].get('ehk', coun)
+	 # print "ehk -> ", ehk
+	 # if  ( ( self.bigList[ind].get(ehk, "0")) == "1" ) :
+	    # nw[coun] = self.bigList[ind].get('ehk', coun)
 	    # nw[coun] = self.bigList[ind].get('ifIndex.%s', coun)
-	    coun = coun + 1
-	    jep = self.bigList[ind].get('ehk', coun)
-	    print "Testi -> ",jep, "ja -> ", ehk
+	    # jep = self.bigList[ind].get('ehk', coun)
+	    # print "Testi loytyi -> ",jep, "ja -> ", ehk
+	    # coun = coun + 1
       for i in (nw) :
       # if (self.bigList[ind].get('ifIndex.%s', coun, 'jep')):
-	 lele = lele + str (self.bigList[ind].get('ifIndex.%s', nw[i]))
+	 # lele = lele + str (self.bigList[ind].get('ifIndex.%s', nw[i]))
+	 lele = lele + nw[i] + "\n"
 	 coun = coun + 1
          # return "jejeje"
 	 # self.bigList[ind].get('idIndex', 'Arvoa ei ollut')

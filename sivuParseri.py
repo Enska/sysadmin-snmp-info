@@ -76,7 +76,7 @@ class Render:
         print "</div>"
 
     def tableEnd(self):
-        print "</table>"
+        print "</table border=\"1\">"
 
     def lB(self):
         print "<br>"
@@ -168,17 +168,30 @@ class TeeKoneLista(Render) :
       # self.header()
       # koneet = self.koneet
       self.cssStart('tilasto')
+      #print "<p> "
+      #print machineName.machineNameInd(ind)
+      #print self.objDiv()
+      # print "param: ", machineName," ind -> ", ind
+      #print machineName.machineLocationInd(ind)
+      # print "lalalal"
+      #print self.objDiv()
+      #print machineName.machineContactInd(ind)
+      #print self.objDiv()
+      #print machineName.machineNetworkInd(ind)
+      #print self.objDiv()
+      # print machineName.printAll(ind)
+      # print " </p>"
       print "<p> "
+      print self.tableStart(), self.tableClStart()
       print machineName.machineNameInd(ind)
-      print self.objDiv()
-      print "param: ", machineName," ind -> ", ind
+      print self.lB()
       print machineName.machineLocationInd(ind)
-      print "lalalal"
-      print self.objDiv()
+      print self.lB()
       print machineName.machineContactInd(ind)
-      print self.objDiv()
+      print self.lB()
       print machineName.machineNetworkInd(ind)
       print self.objDiv()
+      print self.tableClEnd(), self.tableEnd()
       # print machineName.printAll(ind)
       print " </p>"
       self.cssEnd()
