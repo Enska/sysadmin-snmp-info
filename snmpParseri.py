@@ -131,12 +131,12 @@ class Parser:
       #
       if snmptulos == '' :
 	 # Empty result?
-	 print "Debug: Something ir horribly wrong, return this"
-	 print "Debug: snmptulos -> ", snmptulos
+	 # print "Debug: Something ir horribly wrong, return this"
+	 # print "Debug: snmptulos -> ", snmptulos
 	 return "problem", "result empty"
       # New way
       osa = re.search('^(.*) = (.*)', snmptulos)
-      print "Debug: reg-expr results osa 0:", osa.group(0)
+      # print "Debug: reg-expr results osa 0:", osa.group(0)
       # print "Debug: reg-expr results osa 1:", osa.group(1)
       # print "Debug: reg-expr results osa 2:", osa.group(2)
       # print "Debug: reg-expr results osa 3:", osa.group(3)
@@ -145,14 +145,14 @@ class Parser:
       # else do as usual, remove " = TYPE:" part
       nimi = re.search('^(.*)::(.*)', osa.group(1))
       # print "Debug: reg-expr results nimi 1:", nimi.group(1)
-      print "Debug: reg-expr results nimi 2:", nimi.group(2)
+      # print "Debug: reg-expr results nimi 2:", nimi.group(2)
       finimi = nimi.group(2)
       if (osa.group(2) in ('INTEGER', 'OID', 'STRING') ):
 	 cont = re.search('(STRING|OID|INTEGER): (.*)$', osa.group(2))
 	 # print "Debug: reg-expr results cont 0:", cont.group(0)
 	 if ( cont.group(1) != '' ) :
-	    print "Debug: reg-expr results cont 1:", cont.group(1)
-	    print "Debug: reg-expr results cont 2:", cont.group(2)
+	    # print "Debug: reg-expr results cont 1:", cont.group(1)
+	    # print "Debug: reg-expr results cont 2:", cont.group(2)
 	    finres = cont.group(2)
 	 else :
 	    finres = osa.group(2)
