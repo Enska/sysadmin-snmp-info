@@ -24,7 +24,8 @@ class Render:
     def __init__(self, koneet):
         turhake = koneet
         self.cssPrefix = ""
-        self.baseUrl0 = 'http://23.fi/Luokka:Linux'
+	# "home"-URL for this page
+        self.baseUrl0 = 'http://23.fi/Luokka:TestiURL'
         self.baseUrl = '%s' % self.baseUrl0
 
     def header(self):
@@ -39,15 +40,15 @@ class Render:
         print "<body>"
         print "<h2>Laiteinfo sivu</h2>"
         print "<p>Koneet ja niiden tiedot.</p>"
-        print "<h2>Koneet</h2>"
-        print "<h2>Työkalut</h2>"
-        print "<ul><li>%s</ul>" % self.inUrl('Linkki 1', 'Linkki 2')
+        # print "<h2>Koneet</h2>"
+        # print "<h2>Työkalut</h2>"
+        # print "<ul><li>%s</ul>" % self.inUrl('Linkki 1', 'Linkki 2')
         self.cssEnd()
         self.cssStart('sisalto')
 
     def footer(self):
         self.cssEnd()
-        self.cssClass('Ylläpitäjä: enskaätmedusapistetutkapistefi | %s' % self.url(self.baseUrl0,'Linux-tekstit'), 'footer')
+        self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url(self.baseUrl0,'Linux-tekstit'), 'footer')
         print "</body>"
         print "</html>"
 
@@ -61,7 +62,7 @@ class Render:
         print "</div>"
 
     def tableStart(self):
-        print "</table>"
+        print "<table border=\"1\" >"
 
     def tableClStart(self):
         print "<tr>"
@@ -76,10 +77,10 @@ class Render:
         print "</div>"
 
     def tableEnd(self):
-        print "</table border=\"1\">"
+        print "</table>"
 
     def lB(self):
-        print "<br>"
+        print "<br />"
 
     def objDiv(self):
         print " : "
@@ -131,19 +132,29 @@ class TeeKoneLista(Render) :
       bigList = snmpParseri.Parser(kojeet)
       # This is the way to call object-lists...
 
+      print "<p> Here starts the resultlist."
+      # Table's dont work at the moment, there is not need for these now
+      # print self.tableStart(), self.tableClStart()
+
       cou = 0
       for i in kojeet:
 	 # This actually creates the machinelist
 	 # TODO: The list should be a list of links on underpages, which
 	 # contain detailed information about the machine
          # print "Kone ",cou + 1,": ", bigList.machineNameInd(cou), bigList.machineLocationInd(cou)
-	 self.addName(bigList.machineNameInd(cou))
-	 self.addBasicInfo(bigList, cou)
 	 self.lB()
-
-
+	 self.addName(bigList.machineNameInd(cou))
+	 # For ALL the information, use addAllInfo
+	 self.addAllInfo(bigList, cou)
+	 # For only the basics, use addBasicInfo
+	 #self.addBasicInfo(bigList, cou)
+	 self.lB()
 	 cou = cou + 1
 
+      print self.objDiv()
+      print self.tableClEnd(), self.tableEnd()
+      # print machineName.printAll(ind)
+      print " </p>"
       # And this works
       # print "Debug: result: ", bigList.koneNimiInd(0)
 
@@ -157,18 +168,19 @@ class TeeKoneLista(Render) :
       self.footer()
 
    def addName(self, machineName):
-      # self.header()
-      # koneet = self.koneet
-      self.cssStart('tilasto')
-      print machineName
-      self.cssEnd()
-      # self.footer()
+      print "<b>", machineName, "</b>"
 
-   def addBasicInfo(self,machineName, ind):
+   def addBasicInfo(self, machineList, ind):
+      # Called with the name the LIST and index of the machine we want to see on page
       # self.header()
       # koneet = self.koneet
       self.cssStart('tilasto')
-      #print "<p> "
+      print self.lB()
+      print machineList.machineLocationInd(ind)
+      print self.lB()
+      print machineList.machineContactInd(ind)
+      print self.lB()
+      # print "Debug: addBasicInfo() params:", machineName, ind
       #print machineName.machineNameInd(ind)
       #print self.objDiv()
       # print "param: ", machineName," ind -> ", ind
@@ -181,22 +193,26 @@ class TeeKoneLista(Render) :
       #print self.objDiv()
       # print machineName.printAll(ind)
       # print " </p>"
-      print "<p> "
-      print self.tableStart(), self.tableClStart()
-      print machineName.machineNameInd(ind)
-      print self.lB()
-      print machineName.machineLocationInd(ind)
-      print self.lB()
-      print machineName.machineContactInd(ind)
-      print self.lB()
-      print machineName.machineNetworkInd(ind)
-      print self.objDiv()
-      print self.tableClEnd(), self.tableEnd()
-      # print machineName.printAll(ind)
-      print " </p>"
-      self.cssEnd()
-      # self.footer()
 
+   def addAllInfo(self, machineList, ind):
+      # Called with the name the LIST and index of the machine we want to see on page
+      self.cssStart('tilasto')
+      print self.lB()
+      print machineList.machineLocationInd(ind)
+      print self.lB()
+      print machineList.machineContactInd(ind)
+      print self.lB()
+      nlh = {}
+      nlh = machineList.machineNetworkInd(ind)
+      for e in (nlh) :
+	 print nlh[e]
+	 print self.lB()
+      print self.lB()
+      print machineList.machineMemoryInd(ind)
+      print self.lB()
+      print machineList.machineSystemDateInd(ind)
+      print self.lB()
+      print machineList.machineUptimeInd(ind)
 
    def render(self):
       # self.header()

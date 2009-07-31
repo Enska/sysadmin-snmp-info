@@ -27,11 +27,9 @@
 # HOST-RESOURCES-MIB::hrSystemInitialLoadParameters.0
 # HOST-RESOURCES-MIB::hrSystemNumUsers.0 4
 
-
 # HOST-RESOURCES-MIB::hrStorageDescr.1 (muisti)  Mutta saattavat vaihdella eri koneilla
 # HOST-RESOURCES-MIB::hrStorageDescr.31 (levyt)
 # HOST-RESOURCES-MIB::hrStorageDescr.32
-
 
 # Muuttujia
 # lahdefilut
@@ -63,7 +61,7 @@ class Parser:
       cou = 0
 
       for sourceFile in sourceDirectory:
-	 # Actually nimi is a directory
+	 # Go trough all snmp-result files on sourceDirectory -dir
 	 self.bigList[cou] = self.doOneMachineList(sourceFile)
 	 # print "Debug: one result (",cou,"): ", self.bigList[cou], "\n"
          cou = cou + 1
@@ -72,12 +70,16 @@ class Parser:
    ##########################
    # perusfunktiot
 
-   def doOneMachineList(self, sourceDir):
-      # Tama funktio tekee listan tuloksista jota sitten käpistellään
-      # Luetaan tiedostot dict-listoiksi
+   def doOneMachineList(self, snmpInfoFile):
+      # This one reads the file trough. Collect everything from it and
+      # returns it as a dict-list for the caller.
+      #
+      # FIX: Do a check that the file is really a txt-file.
+      #
       # print "Debug: dirikka ->", lahdeTiedosto
       try:
-	 filu = open(sourceDir, 'r')
+	 filu = open(snmpInfoFile, 'r')
+	 # Do file-check here, before readeing the content
 	 self.lista = {}
          for livi in filu.readlines() :
 	     # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
@@ -87,18 +89,17 @@ class Parser:
 	     self.lista[avain] = arvo
          filu.close()
       except IOError, err:
-	 print 'snmp-t9ulostiedostoa (%r) ei pystytty avaamaan.' % (lahdeTiedosto,), err
+	 print 'Couldnt open snmp-datafile directory: (%r).' % (snmpInfoFile), err
 	 #return []
 
       return self.lista
-
-
 
    def teeLista(self, lahdeTiedosto):
       # Tama funktio tekee listan tuloksista jota sitten käpistellään
       # Luetaan tiedostot dict-listoiksi
       # print "Debug: dirikka ->", lahdeTiedosto
       self.lista = {}
+      print 'Debug: We ant to open a file'
 
       try:
 	 filu = open(lahdeTiedosto, 'r')
@@ -116,6 +117,53 @@ class Parser:
       return self.lista
 
    def snmpVastaus(self,snmptulos) :
+      # Params: one line of the snmpwalk result.
+      # Action: Strip of the snmpwalk stuff like MIB information and some chars.
+      # As a result return the human readable name of the MIB and its content
+      # FIX: Sometimes the results dont contain "sss::sss:sss" lines
+      # FIX: Check if there anything at all to search at snmptulos variable
+      #
+      #
+      finimi = ""
+      finres = ""
+      # Old default handler
+      # osa = re.search('^(.*)::(.*) = (.*): (.*)', snmptulos)
+      #
+      if snmptulos == '' :
+	 # Empty result?
+	 print "Debug: Something ir horribly wrong, return this"
+	 print "Debug: snmptulos -> ", snmptulos
+	 return "problem", "result empty"
+      # New way
+      osa = re.search('^(.*) = (.*)', snmptulos)
+      print "Debug: reg-expr results osa 0:", osa.group(0)
+      # print "Debug: reg-expr results osa 1:", osa.group(1)
+      # print "Debug: reg-expr results osa 2:", osa.group(2)
+      # print "Debug: reg-expr results osa 3:", osa.group(3)
+      # Then lets see if there is some content for the MIB
+      # If not, then this is empty result, remove just the "=" char
+      # else do as usual, remove " = TYPE:" part
+      nimi = re.search('^(.*)::(.*)', osa.group(1))
+      # print "Debug: reg-expr results nimi 1:", nimi.group(1)
+      print "Debug: reg-expr results nimi 2:", nimi.group(2)
+      finimi = nimi.group(2)
+      if (osa.group(2) in ('INTEGER', 'OID', 'STRING') ):
+	 cont = re.search('(STRING|OID|INTEGER): (.*)$', osa.group(2))
+	 # print "Debug: reg-expr results cont 0:", cont.group(0)
+	 if ( cont.group(1) != '' ) :
+	    print "Debug: reg-expr results cont 1:", cont.group(1)
+	    print "Debug: reg-expr results cont 2:", cont.group(2)
+	    finres = cont.group(2)
+	 else :
+	    finres = osa.group(2)
+      else :
+	 finres = "lalal"
+      # Old default return
+      # return osa.group(2), osa.group(4)
+      # return nimi.group(2), cont.group(2)
+      return finimi, finres
+
+   def snmpReply(self,snmptulos) :
       # Kutsutaan yhdella snmp-kyselyn tulosrivilla
       # Palauttaa takaisin snmp-muuttujan nimen ja tuloksen
       osa = re.search('^(.*)::(.*) = (.*): (.*)', snmptulos)
@@ -128,30 +176,37 @@ class Parser:
 
    def machineNameInd(self,ind):
       # Hakee koneen nimen ja palauttaa sen
-      return self.bigList[ind].get('sysName.0', 'Arvoa ei ollut')
+      inter='sysName.0'
+      return self.bigList[ind].get(inter, ('Variable ' + inter + ' didnt exist in snmp results. '))
 
    def koneKontakti(self):
       # Hakee koneen kontaktitiedot ja palauttaa sen
-      return self.kokolista.get('sysContact.0', 'Arvoa ei ollut')
+      inter='sysContact.0'
+      return self.bigList[ind].get(inter, ('Variable ' + inter + ' didnt exist in snmp results. '))
 
    def machineContactInd(self,ind):
       # Hakee koneen kontaktitiedot ja palauttaa sen
-      return self.bigList[ind].get('sysContact.0', 'Arvoa ei ollut')
+      inter='sysContact.0'
+      return self.bigList[ind].get(inter, ('Variable ' + inter + ' didnt exist in snmp results. '))
 
    def koneSijainti(self):
       # Hakee koneen sijainnin ja palauttaa sen
-      return self.kokolista.get('sysLocation.0', 'Arvoa ei ollut')
+      inter='sysLocation.0'
+      return self.bigList[ind].get(inter, ('Variable ' + inter + ' didnt exist in snmp results. '))
 
    def machineLocationInd(self,ind):
       # Hakee koneen sijainnin ja palauttaa sen
-      return self.bigList[ind].get('sysLocation.0', 'Arvoa ei ollut')
+      inter='sysLocation.0'
+      return self.bigList[ind].get(inter, ('Variable ' + inter + ' didnt exist in snmp results. '))
 
    # These are handled by the snmp-index number.
+   # NOTE: how about ipV6 interfaces?
    def machineNetworkInd(self, ind):
       # Asks all the network interfaces from the method, then return this as a list
       # TODO
       # Loop the multiple network connections.
-      #
+      # CHANGE -> Returns a list of network interfaces. Caller must take care the
+      # divide between these.
       nw = {}
       coun = 1
       lele = ""
@@ -189,29 +244,34 @@ class Parser:
 	 coun = coun + 1
          # return "jejeje"
 	 # self.bigList[ind].get('idIndex', 'Arvoa ei ollut')
-      return lele
+      # return lele
+      return nw
 
    def koneIpt(self):
       # Hakee koneen ipt (poislukien localhost) ja palauttaa sen
       return self.kokolista.get('sysContact.0', 'Arvoa ei ollut')
 
-   def koneMuisti(self):
-      # Hakee koneen fyysisen muistin määrän ja palauttaa sen
-      # pitää hakea oikea muuttuja ->  HOST-RESOURCES-MIB::hrStorageDescr.1 = STRING: Physical memory
-      # Ja tämä avulla oikea lukuarvo -> HOST-RESOURCES-MIB::hrStorageSize.1 = INTEGER: 2062168
-      return self.kokolista.get('.0', 'Arvoa ei ollut')
+   # TODO: list of ALL memorys (phys and virtual)
+   def machineMemoryInd(self,ind):
+      # Return the index for the memory of the machine
+      # TODO: Check if this one differs on Solaris vs. Linux
+      # One possible variable -> HOST-RESOURCES-MIB::hrStorageSize.1 = INTEGER: 2062168
+      inter='hrMemorySize.0'
+      return self.bigList[ind].get(inter, ('Variable ' + inter + ' didnt exist in snmp results. '))
 
-   def koneJoku1(self):
-      # Hakee koneen nimen ja palauttaa sen
-      return self.lista.get('sysContact.0', 'Arvoa ei ollut')
+   def machineUptimeInd(self,ind):
+      # Return the uptime for this machine (this should always be present)
+      # TODO: Check also that this info is collected from machine
+      inter='hrSystemUptime.0'
+      return self.bigList[ind].get(inter, ('Variable ' + inter + ' didnt exist in snmp results. '))
 
-   def koneJoku2(lista):
-      # Hakee koneen nimen ja palauttaa sen
-      return lista.get('sysContact.0', 'Arvoa ei ollut')
+   def machineSystemDateInd(self, ind):
+      # Return the machine systemdate (this is the fixed datem not UTC)
+      inter='hrSystemDate.0'
+      return self.bigList[ind].get(inter, ('Variable ' + inter + ' didnt exist in snmp results. '))
 
    def vastaus(self, hakemisto):
       return "jokin string"
-
 
    def printAll(self, ind):
        # print the whole list, dont return anything.
