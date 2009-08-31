@@ -99,7 +99,7 @@ class Parser:
       # Luetaan tiedostot dict-listoiksi
       # print "Debug: dirikka ->", lahdeTiedosto
       self.lista = {}
-      print 'Debug: We ant to open a file'
+      print 'Debug: We want to open a file'
 
       try:
 	 filu = open(lahdeTiedosto, 'r')
@@ -121,7 +121,7 @@ class Parser:
       # Action: Strip of the snmpwalk stuff like MIB information and some chars.
       # As a result return the human readable name of the MIB and its content
       # FIX: Sometimes the results dont contain "sss::sss:sss" lines
-      # FIX: Check if there anything at all to search at snmptulos variable
+      # FIX: Check if there anything at all to search at snmptulos variable -> done
       #
       #
       finimi = ""
@@ -134,6 +134,7 @@ class Parser:
 	 # print "Debug: Something ir horribly wrong, return this"
 	 # print "Debug: snmptulos -> ", snmptulos
 	 return "problem", "result empty"
+      #########################################
       # New way
       osa = re.search('^(.*) = (.*)', snmptulos)
       # print "Debug: reg-expr results osa 0:", osa.group(0)
@@ -147,20 +148,39 @@ class Parser:
       # print "Debug: reg-expr results nimi 1:", nimi.group(1)
       # print "Debug: reg-expr results nimi 2:", nimi.group(2)
       finimi = nimi.group(2)
-      if (osa.group(2) in ('INTEGER', 'OID', 'STRING') ):
-	 cont = re.search('(STRING|OID|INTEGER): (.*)$', osa.group(2))
+      # ('INTEGER' | 'OID' | 'STRING')
+      # if ((":") in osa.group(2)):
+      # Problem for if-statement:
+      # IF variable is not set, we cannot check if there is content or not, gives error:
+      # AttributeError: 'NoneType' object has no attribute 'group'
+      # So how to check if there is content? -> count
+      if ( (str.count(osa.group(2), ":")) >= 1 ):
+	 # If there is something to find, lets check.
+	 # No sense setting these as list for search:
+	 # STRING|OID|INTEGER|Gauge32|Counter32|IpAddress|Timeticks
+	 cont = re.search('(.*): (.*)$', osa.group(2))
+	 # print "Debug: search testi. Var -> ", osa.group(2), " Pointer ->", cont
 	 # print "Debug: reg-expr results cont 0:", cont.group(0)
-	 if ( cont.group(1) != '' ) :
-	    # print "Debug: reg-expr results cont 1:", cont.group(1)
-	    # print "Debug: reg-expr results cont 2:", cont.group(2)
+	 # print "Debug: reg-expr results cont 1:", cont.group(1)
+	 # print "Debug: reg-expr results cont 2:", cont.group(2)
+	 # We need to check, if there is anything at cont.group(2)
+	 if ( (str.count(cont.group(2), '')) >= 1 ) :
+	    # Ok, wefound something as a final result.
+	    # print "Debug: (if cont != ) reg-expr results cont 1:", cont.group(1)
+	    # print "Debug: (if cont != ) reg-expr results cont 2:", cont.group(2)
 	    finres = cont.group(2)
 	 else :
-	    finres = osa.group(2)
+	    # NO RESULT, value of the OID was is empty (zero lenght)
+	    # print "Debug: reg-expr results are null for cont 1:", cont
+	    # print "Debug: reg-expr results for cont 2:", cont.group(2)
+	    # finres = osa.group(2)
+	    finres = "None results for this OID"
       else :
-	 finres = "lalal"
+	 finres = "No results for this OID."
       # Old default return
       # return osa.group(2), osa.group(4)
       # return nimi.group(2), cont.group(2)
+      # print "---------------------"
       return finimi, finres
 
    def snmpReply(self,snmptulos) :
@@ -176,8 +196,9 @@ class Parser:
 
    def machineNameInd(self,ind):
       # Hakee koneen nimen ja palauttaa sen
-      inter='sysName.0'
-      return self.bigList[ind].get(inter, ('Variable ' + inter + ' didnt exist in snmp results. '))
+      # inter='sysName.0'
+      # return self.bigList[ind].get('sysName.0', ('Variable ' + inter + ' didnt exist in snmp results. '))
+      return self.bigList[ind].get('sysName.0', 'NOPE')
 
    def koneKontakti(self):
       # Hakee koneen kontaktitiedot ja palauttaa sen
