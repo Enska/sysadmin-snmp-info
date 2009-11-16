@@ -98,7 +98,7 @@ class Render:
         return "<a href=\"%(url)s\">%(text)s</a>" % {'url':url,'text':text}
 
 class TeeKoneLista(Render) :
-   # This class creates a page, wwhich we show to user.
+   # This class creates a page, which we show to user.
 
    def __init__(self,koneet):
       # Basic init-method. This is used on creation.
@@ -143,9 +143,11 @@ class TeeKoneLista(Render) :
 	 # contain detailed information about the machine
          # print "Kone ",cou + 1,": ", bigList.machineNameInd(cou), bigList.machineLocationInd(cou)
 	 self.lB()
+	 # print "Debug: cou -> %s, i -> %s .", cou, i
 	 self.addName(bigList.machineNameInd(cou))
 	 # For ALL the information, use addAllInfo
 	 self.addAllInfo(bigList, cou)
+	 self.lB()
 	 # For only the basics, use addBasicInfo
 	 #self.addBasicInfo(bigList, cou)
 	 self.lB()
@@ -197,21 +199,21 @@ class TeeKoneLista(Render) :
    def addAllInfo(self, machineList, ind):
       # Called with the name the LIST and index of the machine we want to see on page
       self.cssStart('tilasto')
-      print self.lB()
+      self.lB()
       print machineList.machineLocationInd(ind)
-      print self.lB()
+      self.lB()
       print machineList.machineContactInd(ind)
-      print self.lB()
+      self.lB()
       nlh = {}
       nlh = machineList.machineNetworkInd(ind)
       for e in (nlh) :
 	 print nlh[e]
-	 print self.lB()
-      print self.lB()
+	 self.lB()
+      self.lB()
       print machineList.machineMemoryInd(ind)
-      print self.lB()
+      self.lB()
       print machineList.machineSystemDateInd(ind)
-      print self.lB()
+      self.lB()
       print machineList.machineUptimeInd(ind)
 
    def render(self):

@@ -85,6 +85,10 @@ class Parser:
 	     # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
 	     # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
 	     # snmpt.append(snmp_vastaus(li))
+	     string.strip(livi)
+	     #string.lstrip(livi)
+	     # livi.splitlines()
+	     # print "Debug snmpParseri.py -> livi ->", livi, "<-"
 	     avain, arvo = self.snmpVastaus(livi)
 	     self.lista[avain] = arvo
          filu.close()
@@ -107,6 +111,7 @@ class Parser:
 	     # Kaydaan kaikki tulosrivit lapi tiedostosta ja laitetaan tulokset talteen
 	     # testi-dict :iin. Avaimeksi aina snmp-muuttuja ja arvoksi snmp-kyselyn tulos
 	     # snmpt.append(snmp_vastaus(li))
+	     # print "Debug snmpParseri.py -> livi -> ", livi
 	     avain, arvo = self.snmpVastaus(livi)
 	     self.lista[avain] = arvo
 	     filu.close()
@@ -218,6 +223,7 @@ class Parser:
    def machineLocationInd(self,ind):
       # Hakee koneen sijainnin ja palauttaa sen
       inter='sysLocation.0'
+      # print "Debug: ind -> ", ind," value -> ", self.bigList[ind].get(inter)
       return self.bigList[ind].get(inter, ('Variable ' + inter + ' didnt exist in snmp results. '))
 
    # These are handled by the snmp-index number.
