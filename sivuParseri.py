@@ -38,8 +38,8 @@ class Render:
         print "<link rel=\"stylesheet\" href=\"pelit.css\" type=\"text/css\">"
         print "</head>"
         print "<body>"
-        print "<h2>Laiteinfo sivu</h2>"
-        print "<p>Koneet ja niiden tiedot.</p>"
+        print "<h2>Server info</h2>"
+        print "<p>Servers as list</p>"
         # print "<h2>Koneet</h2>"
         # print "<h2>Työkalut</h2>"
         # print "<ul><li>%s</ul>" % self.inUrl('Linkki 1', 'Linkki 2')
@@ -114,7 +114,6 @@ class TeeKoneLista(Render) :
       # TODO:
       # -tehtävä config luokka/parseri, joka otetaan mukaan import:lla?
       kojeet = self.lueFilut("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
-      # print "Debug: kojeet: ", kojeet, self.lB()
 
       # This one needs to be changed. We want to have as return a hash-list?
       # bigList =  {}
@@ -133,6 +132,8 @@ class TeeKoneLista(Render) :
       # This is the way to call object-lists...
 
       print "<p> Here starts the resultlist."
+      self.lB()
+      self.lB()
       # Table's dont work at the moment, there is not need for these now
       # print self.tableStart(), self.tableClStart()
 
@@ -142,8 +143,11 @@ class TeeKoneLista(Render) :
 	 # TODO: The list should be a list of links on underpages, which
 	 # contain detailed information about the machine
          # print "Kone ",cou + 1,": ", bigList.machineNameInd(cou), bigList.machineLocationInd(cou)
+	 print "machine no:", cou+1 ,". "
 	 self.lB()
-	 # print "Debug: cou -> %s, i -> %s .", cou, i
+	 print "%s" % self.url(bigList.machineNameInd(cou))
+	 self.lB()
+	 # "%s</ul>" % self.inUrl('Linkki 1', 'Linkki 2')
 	 self.addName(bigList.machineNameInd(cou))
 	 # For ALL the information, use addAllInfo
 	 self.addAllInfo(bigList, cou)
@@ -177,11 +181,11 @@ class TeeKoneLista(Render) :
       # self.header()
       # koneet = self.koneet
       self.cssStart('tilasto')
-      print self.lB()
+      self.lB()
       print machineList.machineLocationInd(ind)
-      print self.lB()
+      self.lB()
       print machineList.machineContactInd(ind)
-      print self.lB()
+      self.lB()
       # print "Debug: addBasicInfo() params:", machineName, ind
       #print machineName.machineNameInd(ind)
       #print self.objDiv()
@@ -239,7 +243,7 @@ class TeeKoneLista(Render) :
 	    snmpfilut2.insert(snmpfilut1.index(fil), hakemisto + '/' + fil)
 	 # print "Debug: lueFilut() -> dircache -> tulos3: ", snmpfilut2
       except IOError, err:
- 	 print 'snmp-tuloshakemistoa (%r) ei pystytty avaamaan.' % ('hakemisto',), err
+ 	 print 'Couldnt open the snmp-results-file-directory (%r).' % ('hakemisto',), err
 
       return snmpfilut2
       #return self.lista
