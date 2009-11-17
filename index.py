@@ -10,7 +10,7 @@
 # TODO
 # -snmpkyselyt -> ehkä cron-skripti?
 # -asetusten hallinta ja taltiointi
-# -
+# -inner links between pages
 # -
 
 #import sys
@@ -33,17 +33,31 @@ sivu = ""
 path = ['']
 if os.environ.has_key('PATH_INFO'):
    path = os.environ['PATH_INFO'].split('/')[1:]
+   # print "Debug: path -> %s"% path
 
 urls = {}
 fs = cgi.FieldStorage(keep_blank_values=1)
 snmp = "testi"
-
+turha= "joo"
 
 # Here we call the method to create a TeeKoneLista object, which has the information in
-urls['koneet'] = sivuParseri.TeeKoneLista(snmp)
+urls['/'] = sivuParseri.teePerusSivu(turha)
+urls['konelista'] = sivuParseri.teeKoneLista(snmp)
+urls['kone'] = sivuParseri.teeKoneLista(snmp)
+# urls['konelista'] = sivuParseri.teeKoneLista(snmp)
+# print "Debug: path1: -> %s" % path[1:]
+# print "Debug: urls -> %s" % urls
 
+# if urls.has_key(path[0]):
+if urls.has_key(path[0]):
+   # Call the def_name.function
+   print "Debug: call: urls[%s].doPage(path[1:]) "%  path[0]
+   urls[path[0]].doPage(path[1:])
+else:
+   print "Debug: Default action on index.py"
+   urls['/'].doPage()
 
-
+# urls['konelista'].doPage()
 # sivu = sivuParseri.TeeKoneLista()
 
 # print "Debug: sivu ->", sivu
@@ -58,5 +72,4 @@ urls['koneet'] = sivuParseri.TeeKoneLista(snmp)
 #x = pageHandler.RenderPelikerrat().render()
 #urls['pelaaja'] = renderPelaaja()
 #urls['peli'] = renderPeli()
-
 # print index
