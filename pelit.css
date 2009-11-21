@@ -18,15 +18,15 @@ html > body {
              border-right: dotted 1px #6666CC;
 	     }
 
-a { 
+a {
     text-decoration: none;
-    
+
     }
 
 .peli {
         /*background-color: #CCCCFF;*/
       }
-.kuvaus { 
+.kuvaus {
         padding: 0.5em;
           }
 
@@ -45,26 +45,26 @@ a {
                 font-weight: bold;
                /*background-color: white;*/
 	      }
-.sijoitus_0 { 
+.sijoitus_0 {
               display: inline;
                }
-.sijoitus_1 { 
+.sijoitus_1 {
               display: inline;
                }
-.sijoitus_1 a { 
+.sijoitus_1 a {
                 color: black;
               display: inline;
                }
-.sijoitus_2 { 
+.sijoitus_2 {
                display: inline;
                }
-.sijoitus_3 { 
+.sijoitus_3 {
                display: inline;
                }
-.sijoitus_4 { 
+.sijoitus_4 {
                display: inline;
                }
-.sijoitus_None { 
+.sijoitus_None {
                display: inline;
                }
 
@@ -74,14 +74,14 @@ a {
       }
 
 .kommentti {
-             border-top: dotted 2px black;		   
+             border-top: dotted 2px black;
              padding: 0.5em;
 
       }
-.kommentti .kommentoija { 
+.kommentti .kommentoija {
                   display: inline;
        }
-.kommentti .pvm { 
+.kommentti .pvm {
                   display: inline;
        }
 
@@ -140,7 +140,7 @@ background: #C3D9FF;
 }
 
 h1, h2, h3 {
-    text-align: left; 
+    text-align: left;
     font-family: sans-serif;
 }
 

@@ -9,7 +9,7 @@
 
 # TODO
 # -snmpkyselyt -> ehkä cron-skripti?
-# -asetusten hallinta ja taltiointi
+# -config handling for servers and other clients
 # -inner links between pages
 # -
 
@@ -28,6 +28,8 @@ import sivuParseri
 # snmp-kyselyuden tuloksialle hakemisto
 #snmpdir=
 
+
+# FIX: get baseURL somehow...
 sivu = ""
 # handle the urls
 path = ['']
@@ -35,26 +37,41 @@ if os.environ.has_key('PATH_INFO'):
    path = os.environ['PATH_INFO'].split('/')[1:]
    # print "Debug: path -> %s"% path
 
+# contextRoot = os.environ['PATH_INFO']
+contextRoot = "http://localhost/tommi/index.py"
+
+#
+#for param in os.environ.keys():
+#    print "%20s %s" % (param,os.environ[param])
+
 urls = {}
 fs = cgi.FieldStorage(keep_blank_values=1)
-snmp = "testi"
-turha= "joo"
+# = "testi"
+# turha= "joo"
 
 # Here we call the method to create a TeeKoneLista object, which has the information in
-urls['/'] = sivuParseri.teePerusSivu(turha)
-urls['konelista'] = sivuParseri.teeKoneLista(snmp)
-urls['kone'] = sivuParseri.teeKoneLista(snmp)
+urls['/'] = sivuParseri.doBasicPage(contextRoot)
+urls['konelista'] = sivuParseri.doMachineList(contextRoot)
+urls['kone'] = sivuParseri.doMachineList(contextRoot)
+urls['server'] = sivuParseri.doServerPage(contextRoot)
 # urls['konelista'] = sivuParseri.teeKoneLista(snmp)
 # print "Debug: path1: -> %s" % path[1:]
 # print "Debug: urls -> %s" % urls
 
+# urls["kone"].doPage(path[:1])
+
 # if urls.has_key(path[0]):
 if urls.has_key(path[0]):
    # Call the def_name.function
-   print "Debug: call: urls[%s].doPage(path[1:]) "%  path[0]
-   urls[path[0]].doPage(path[1:])
+   #if path[0] == "server":
+      # Special case, this needs also the servername
+      #urls[path[0]].doPage(path[1:], path[2:])
+   #else:
+      # print "Debug: call: urls[%s].doPage(path[1:]) "%  path[0]
+      urls[path[0]].doPage(path[1:])
+
 else:
-   print "Debug: Default action on index.py"
+   # print "Debug: Default action on index.py"
    urls['/'].doPage()
 
 # urls['konelista'].doPage()

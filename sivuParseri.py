@@ -2,7 +2,7 @@
 # -*- coding: iso-8859-15 -*-
 #
 # Original class author: Petteri Klemola
-# Used and modified with permission for this use.
+# Used, modified and published with permission for this use.
 #
 # Author: Tommi Ruuth
 #
@@ -21,13 +21,11 @@ import snmpParseri
 class Render:
    # Luokka joka rakentelee itseään kutsumalla nettisivun
 
-    def __init__(self, koneet):
-        turhake = koneet
+    def __init__(self, url):
+        # @params: Base URL for this page
         self.cssPrefix = ""
-	# "home"-URL for this page
-        # self.baseUrl0 = 'http://23.fi/Luokka:TestiURL'
-	self.baseUrl0 = 'http://localhost/tommi'
-        self.baseUrl = '%s' % self.baseUrl0
+	# print "Debug:Render:__init__: url -> %s" % url
+	self.setBaseUrl(url)
 
     def header(self):
         print "Content-Type: text/html \n"
@@ -35,21 +33,18 @@ class Render:
         print "<head>"
         print "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-15\" />"
         print "<meta name=\"Authors\" content=\"Tommi Ruuth, Petteri Klemola\" />"
-        # print "<link rel=\"stylesheet\" href=\"http://23.fi/pelit/pelit.css\" type=\"text/css\">"
-        print "<link rel=\"stylesheet\" href=\"pelit.css\" type=\"text/css\">"
+        print "<link rel=\"stylesheet\" href=\"%s/pelit.css\" type=\"text/css\">" % self.getContextRoot()
         print "</head>"
         print "<body>"
-        print "<h2>Server info</h2>"
-        # print "<p>Servers as list</p>"
-        # print "<h2>Koneet</h2>"
-        # print "<h2>Työkalut</h2>"
-        # print "<ul><li>%s</ul>" % self.inUrl('Linkki 1', 'Linkki 2')
         self.cssEnd()
         self.cssStart('sisalto')
 
     def footer(self):
         self.cssEnd()
-        self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url(self.baseUrl0,'Footer part'), 'footer')
+        # self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url(self.baseUrl0,'Footer part'), 'footer')
+	self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url(self.getBaseUrl(),'Footer part'), 'footer')
+	# self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url('testi','Footer part'), 'footer')
+	print "getBaseUrl: %s" % self.getBaseUrl()
         print "</body>"
         print "</html>"
 
@@ -96,6 +91,32 @@ class Render:
         text = str(text)
         return text.replace('\r\n','<br />')
 
+    def setBaseUrl(self, bu):
+	# @params: (str) URL
+	# @return: none
+	self.setContextRoot(bu)
+	self.baseUrl = '%s' % bu
+
+    def getBaseUrl(self):
+	# @params: None
+	# @return: (str) baseUrl
+	return self.baseUrl
+
+    def setContextRoot(self,bu):
+        # sets contextRoot (no index-file on that path)
+	cr = bu
+	if (cr.endswith("index.py")):
+	      cr = cr.rstrip('index.py')
+	      cr = cr.rstrip("/")
+	self.contextRoot = '%s' % cr
+
+    def getContextRoot(self):
+        # returns cotextroot
+	# @params: None
+	# @return: (str) contextRoot
+	return self.contextRoot
+
+
     def inUrl(self, url, text=None):
 	# @params: URL, alias for it
         return self.url(self.baseUrl+"/"+url, text)
@@ -105,10 +126,11 @@ class Render:
             text = url
         return "<a href=\"%(url)s\">%(text)s</a>" % {'url':url,'text':text}
 
-class teePerusSivu(Render) :
+class doBasicPage(Render) :
 
    def __init__(self, jep):
-      # Set basics for tha page
+      # Set basics for the page
+      # self.jep = 'http://localhost/tommi/index.py'
       Render.__init__(self, jep)
       # Create basic page
 
@@ -116,10 +138,32 @@ class teePerusSivu(Render) :
       self.header()
       print "<p> sivuParseri.py::teePerusSivu::doPage method test. </p>"
       self.cssClass('Header for this page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
-      # self.footer()
-      self.cssClass('Test underpage | %s ' %self.url('kone', 'Kaikki koneet'), 'tilasto')
+      self.cssClass('Test underpage | %s ' %self.inUrl('kone', 'Kaikki koneet'), 'tilasto')
+      self.footer()
 
-class teeKoneLista(Render) :
+class doServerPage(Render) :
+
+   def __init__(self, URL):
+      Render.__init__(self, URL)
+
+
+   def doPage(self, mach) :
+      if (mach[0]):
+	 server = mach[0]
+      else:
+	Error("vika")
+      self.header()
+      print "<p> sivuParseri.py::teeServerSivu::doPage method test. </p>"
+      self.bStart()
+      # print mach[0]
+      print "%s" % server
+      self.bEnd()
+      self.cssClass('Header for this page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
+      self.cssClass('Test underpage | %s ' %self.inUrl('kone', 'Kaikki koneet'), 'tilasto')
+      self.footer()
+
+
+class doMachineList(Render) :
    # This class creates a page, which we show to user.
 
    def __init__(self,koneet):
@@ -137,10 +181,11 @@ class teeKoneLista(Render) :
       self.bigList = snmpParseri.Parser(self.kojeet)
       # This is the way to call object-lists...
 
-   def doPage(self):
-      # self.header()
+   def doPage(self, jotain):
       kojeet = self.kojeet
       bigList = self.bigList
+
+      self.header()
       self.cssStart('sisalto')
 
       print "<p> sivuParseri.py::teeKoneLista::doPage method test. </p>"
@@ -158,7 +203,7 @@ class teeKoneLista(Render) :
 	 self.lB()
 	 self.bStart()
 	 # print "%s" % self.url(bigList.machineNameInd(cou))
-	 print "%s" % self.inUrl(bigList.machineNameInd(cou), "show")
+	 print "%s" % self.inUrl("server/"+bigList.machineNameInd(cou), "testi")
 	 self.bEnd()
 	 print "(machine no:", cou+1 ,")"
 	 self.lB()
@@ -191,6 +236,7 @@ class teeKoneLista(Render) :
 	 # print "Kone tiedot:", bigList.koneNimiInd(ind), bigList.koneSijaintiInd(ind), bigList.koneVerkkoInd(ind)
 
       self.cssEnd()
+      self.footer()
 
    def addName(self, machineName):
       print "<b>", machineName, "</b>"
@@ -278,7 +324,7 @@ class Error(Render):
             'Nyt ei oikein näytä sujuvan, ehkä sun kannatais mennä muualle'
             ]
 
-    def render(self):
+    def doPage(self):
         self.header()
         self.cssClass("<b>%s:</b> %s" % (random.choice(self.prefix), self.text), 'virhe')
         self.footer()
