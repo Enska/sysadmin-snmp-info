@@ -54,11 +54,7 @@ urls['/'] = sivuParseri.doBasicPage(contextRoot)
 urls['konelista'] = sivuParseri.doMachineList(contextRoot)
 urls['kone'] = sivuParseri.doMachineList(contextRoot)
 urls['server'] = sivuParseri.doServerPage(contextRoot)
-# urls['konelista'] = sivuParseri.teeKoneLista(snmp)
-# print "Debug: path1: -> %s" % path[1:]
-# print "Debug: urls -> %s" % urls
-
-# urls["kone"].doPage(path[:1])
+urls['config'] = sivuParseri.doConfigPage(contextRoot)
 
 # if urls.has_key(path[0]):
 if urls.has_key(path[0]):

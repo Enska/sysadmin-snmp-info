@@ -58,22 +58,38 @@ class Render:
         print "</div>"
 
     def tableStart(self):
-        print "<table border=\"1\" >"
+	 print "<table border=\"0\" >"
 
-    def tableClStart(self):
-        print "<tr>"
+    def tableEnd(self):
+        print "</table>"
 
-    def tableClEnd(self):
-        print "</tr>"
+    def tableRowStart(self):
+	 print "<tr>"
+
+    def tableRowEnd(self):
+	 print "</tr>"
+
+    def tableCellStart(self):
+	 print "<td>"
+
+    def tableCellEnd(self):
+	 print "</td>"
+
+    def addTableRow(self, descr, cont):
+	 self.tableRowStart()
+	 self.tableCellStart()
+	 print descr
+	 self.tableCellEnd()
+	 self.tableCellStart()
+	 print cont
+	 self.tableCellEnd()
+	 self.tableRowEnd()
 
     def tableSStart(self):
         print "</div>"
 
     def tableSEnd(self):
         print "</div>"
-
-    def tableEnd(self):
-        print "</table>"
 
     def lB(self):
         print "<br />"
@@ -136,18 +152,66 @@ class doBasicPage(Render) :
 
    def doPage(self) :
       self.header()
-      print "<p> sivuParseri.py::teePerusSivu::doPage method test. </p>"
       self.cssClass('Header for this page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
-      self.cssClass('Test underpage | %s ' %self.inUrl('kone', 'Kaikki koneet'), 'tilasto')
+      print "<p> sivuParseri.py::teePerusSivu::doPage method test. </p>"
+      self.cssClass('Machine list page | %s ' %self.inUrl('kone', 'All the machines'), 'tilasto')
+      self.cssClass('Test underpage | %s ' %self.inUrl('config', 'Config / settings'), 'tilasto')
       self.footer()
+
+class prepData(Render) :
+
+   def __init__(self, ds):
+      # Prepare data for use
+      # Read files, create lists
+      self.kojeet = self.listFiles("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      self.resFiles = self.listFiles(ds)
+
+      # Create one big hash-list of machineinformation
+      # self.bigList = snmpParseri.Parser(self.kojeet)
+      # print "prepData::__init__ tester"
+
+   def listData(self):
+      # Read all the files for manipulating
+      # resFiles = self.listFiles(ds)
+      resList = snmpParseri.Parser(self.resFiles)
+      return resList
+
+   def getFilesList(self):
+      # return datalist
+      return self.resFiles
+
+   def listFiles(self, dirr):
+      # Read all the filenames and full paths to a list and returns this
+      try:
+	 snmpfilut1 = dircache.listdir(dirr)
+	 snmpfilut1 = snmpfilut1[:]  # jotta voidaan muokata listaa
+	 snmpfilut2 = []
+	 for fil in snmpfilut1:
+	    withdir = dirr + '/' + fil
+	    snmpfilut2.insert(snmpfilut1.index(fil), dirr + '/' + fil)
+      except IOError, err:
+ 	 print 'Couldnt open the snmp-results-file-directory (%r).' % ('dirr',), err
+
+      return snmpfilut2
+
+class tester(Render):
+   def __init__(self):
+      print "jaja"
+
+   def retS(self, st):
+      return st
+
 
 class doServerPage(Render) :
 
    def __init__(self, URL):
       Render.__init__(self, URL)
+      self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      self.bigList = snmpParseri.Parser(self.ds.getFilesList())
 
-
-   def doPage(self, mach) :
+   def doPage(self, mach):
+      #@params: name of server or instance
+      #@return: None
       if (mach[0]):
 	 server = mach[0]
       else:
@@ -155,13 +219,31 @@ class doServerPage(Render) :
       self.header()
       print "<p> sivuParseri.py::teeServerSivu::doPage method test. </p>"
       self.bStart()
-      # print mach[0]
       print "%s" % server
       self.bEnd()
-      self.cssClass('Header for this page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
+      self.addAllServerInfo(self, server)
+      self.cssClass('Server page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
       self.cssClass('Test underpage | %s ' %self.inUrl('kone', 'Kaikki koneet'), 'tilasto')
       self.footer()
 
+   def addAllServerInfo(self, lis, name):
+      # Called with the name the LIST and index of the machine we want to see on page
+      machineList = self.bigList
+      target = name
+      ind = machineList.machineIdInd(name)
+      self.cssStart('tilasto')
+      self.lB()
+      self.tableStart()
+      self.addTableRow("Machine location:", machineList.machineLocationInd(ind) )
+      self.addTableRow("Mchine contact:", machineList.machineContactInd(ind) )
+      nlh = {}
+      nlh = machineList.machineNetworkInd(ind)
+      for e in (nlh) :
+	 self.addTableRow("Network adapter %s :" %e, nlh[e])
+      self.addTableRow("Memory:", machineList.machineMemoryInd(ind) )
+      self.addTableRow("System date:", machineList.machineSystemDateInd(ind) )
+      self.addTableRow("Uptime:", machineList.machineUptimeInd(ind) )
+      self.tableEnd()
 
 class doMachineList(Render) :
    # This class creates a page, which we show to user.
@@ -169,72 +251,52 @@ class doMachineList(Render) :
    def __init__(self,koneet):
       # Basic init-method. This is used on creation.
       Render.__init__(self,koneet)
-      # Luetaan l‰pi hakemisto, jossa tulosfilut ovat ja k‰sitell‰‰n
-      # snmpParseri luokalla halutut filukkeet.
-      # TODO:
-      # -teht‰v‰ config luokka/parseri, joka otetaan mukaan import:lla?
 
+      # joku = tester()
+      # print joku.retS("testiiii")
       # Read all the files for manipulating
-      self.kojeet = self.lueFilut("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
 
       # Create one big hash-list of machineinformation
-      self.bigList = snmpParseri.Parser(self.kojeet)
+      self.bigList = snmpParseri.Parser(self.ds.getFilesList())
       # This is the way to call object-lists...
 
    def doPage(self, jotain):
-      kojeet = self.kojeet
+      # kojeet = self.dataFiles
+      kojeet = self.ds.getFilesList()
       bigList = self.bigList
-
       self.header()
       self.cssStart('sisalto')
 
-      print "<p> sivuParseri.py::teeKoneLista::doPage method test. </p>"
-      print "<p> Here starts the resultlist. </p>"
-      self.lB()
-      self.lB()
+      print "<p> All the machines we have got information about. </p>"
 
       cou = 0
       allmac = len(kojeet)
+      contlist = []
+      self.tableStart()
+      self.tableRowStart()
+      self.tableCellStart()
+      print "Index"
+      self.tableCellEnd()
+      self.tableCellStart()
+      print "Server name"
+      self.tableCellEnd()
+      self.tableRowEnd()
       for i in kojeet:
-	 # This actually creates the machinelist
-	 # TODO: The list should be a list of links on underpages, which
-	 # contain detailed information about the machine
-         # print "Kone ",cou + 1,": ", bigList.machineNameInd(cou), bigList.machineLocationInd(cou)
-	 self.lB()
+	 self.tableRowStart()
+	 self.tableCellStart()
+	 print cou + 1
+	 self.tableCellEnd()
+	 self.tableCellStart()
 	 self.bStart()
-	 # print "%s" % self.url(bigList.machineNameInd(cou))
-	 print "%s" % self.inUrl("server/"+bigList.machineNameInd(cou), "testi")
+	 mac = bigList.machineNameInd(cou)
+	 print "%s" % self.inUrl("server/" + mac, mac)
 	 self.bEnd()
-	 print "(machine no:", cou+1 ,")"
-	 self.lB()
-	 # "%s</ul>" % self.inUrl('Linkki 1', 'Linkki 2')
-	 # self.addName(bigList.machineNameInd(cou))
-
-	 # For ALL the information, use addAllInfo
-	 # self.addAllInfo(bigList, cou)
-	 # self.lB()
-	 # For only the basics, use addBasicInfo
-	 # self.addBasicInfo(bigList, cou)
-	 self.lB()
+	 # print "(machine no:", cou+1 ,")"
+	 self.tableCellEnd()
+	 self.tableRowEnd()
 	 cou = cou + 1
-
-      print self.objDiv()
-      # print self.tableClEnd(), self.tableEnd()
-      # print machineName.printAll(ind)
-      # print " </p>"
-      # And this works
-      # print "Debug: result: ", bigList.koneNimiInd(0)
-
-      # This seems to be useless at the moment
-      # self.cssStart('tilasto')
-      # This one needs to be changed. We want to have as return a hash-list?
-      # bigList =  {}
-      #for ind in kojeet:
-	 # tiedot = snmpParseri.Parser(ind)
-	 # bigList[ind] = tiedot
-	 # print "Kone tiedot:", tiedot.koneNimi(), tiedot.koneSijainti(), tiedot.koneVerkko(), self.lB()
-	 # print "Kone tiedot:", bigList.koneNimiInd(ind), bigList.koneSijaintiInd(ind), bigList.koneVerkkoInd(ind)
-
+      self.tableEnd()
       self.cssEnd()
       self.footer()
 
@@ -286,7 +348,6 @@ class doMachineList(Render) :
       print machineList.machineUptimeInd(ind)
 
 
-
    def lueFilut(self, hakemisto):
       # Lukee hakemistossa olevien tiedostojen nimet ja polut talteen
       filukkeet = hakemisto
@@ -306,6 +367,18 @@ class doMachineList(Render) :
 
       return snmpfilut2
       #return self.lista
+
+
+class doConfigPage(Render) :
+
+   def __init__(self, jep):
+      Render.__init__(self, jep)
+
+   def doPage(self, something) :
+      self.header()
+      print "<p> Config-page to handle settings of clients. </p>"
+      self.cssClass('Config-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
+      self.footer()
 
 class Error(Render):
 

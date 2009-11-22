@@ -205,6 +205,15 @@ class Parser:
       # return self.bigList[ind].get('sysName.0', ('Variable ' + inter + ' didnt exist in snmp results. '))
       return self.bigList[ind].get('sysName.0', 'NOPE')
 
+   def machineIdInd(self, name):
+      # Checks trough the list and returns the index of succesful find. Otherwise returns -1
+      resu = -1
+      look = name
+      for k in self.bigList:
+	if ( self.machineNameInd(k) == name):
+	    resu = k
+      return resu
+
    def koneKontakti(self):
       # Hakee koneen kontaktitiedot ja palauttaa sen
       inter='sysContact.0'
