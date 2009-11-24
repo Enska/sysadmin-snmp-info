@@ -127,7 +127,7 @@ class Render:
 	self.contextRoot = '%s' % cr
 
     def getContextRoot(self):
-        # returns cotextroot
+        # returns contextroot
 	# @params: None
 	# @return: (str) contextRoot
 	return self.contextRoot
@@ -146,14 +146,12 @@ class doBasicPage(Render) :
 
    def __init__(self, jep):
       # Set basics for the page
-      # self.jep = 'http://localhost/tommi/index.py'
       Render.__init__(self, jep)
-      # Create basic page
 
    def doPage(self) :
       self.header()
-      self.cssClass('Header for this page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
-      print "<p> sivuParseri.py::teePerusSivu::doPage method test. </p>"
+      self.cssClass('To-be-named-better-project | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
+      print "<p>Welcome to a to-be-named-better-project, which intends to produce a small sys admin tool. Idea of the tool is to collect server/switch/snmp-enabled machine data and show it as nice web-page. The collecting of data is done with snmp-protocol and this is the only method that is supported.</p>"
       self.cssClass('Machine list page | %s ' %self.inUrl('kone', 'All the machines'), 'tilasto')
       self.cssClass('Test underpage | %s ' %self.inUrl('config', 'Config / settings'), 'tilasto')
       self.footer()
@@ -163,7 +161,7 @@ class prepData(Render) :
    def __init__(self, ds):
       # Prepare data for use
       # Read files, create lists
-      self.kojeet = self.listFiles("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      # self.kojeet = self.listFiles("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
       self.resFiles = self.listFiles(ds)
 
       # Create one big hash-list of machineinformation
@@ -215,9 +213,11 @@ class doServerPage(Render) :
       if (mach[0]):
 	 server = mach[0]
       else:
-	Error("vika")
+	Error(self.getBaseUrl())
+
       self.header()
-      print "<p> sivuParseri.py::teeServerSivu::doPage method test. </p>"
+      self.cssClass('Header for this page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
+      print "<p> This is the server-info page for one server. You should be able to see all the information as a table on below. </p>"
       self.bStart()
       print "%s" % server
       self.bEnd()
@@ -231,19 +231,24 @@ class doServerPage(Render) :
       machineList = self.bigList
       target = name
       ind = machineList.machineIdInd(name)
-      self.cssStart('tilasto')
-      self.lB()
-      self.tableStart()
-      self.addTableRow("Machine location:", machineList.machineLocationInd(ind) )
-      self.addTableRow("Mchine contact:", machineList.machineContactInd(ind) )
-      nlh = {}
-      nlh = machineList.machineNetworkInd(ind)
-      for e in (nlh) :
-	 self.addTableRow("Network adapter %s :" %e, nlh[e])
-      self.addTableRow("Memory:", machineList.machineMemoryInd(ind) )
-      self.addTableRow("System date:", machineList.machineSystemDateInd(ind) )
-      self.addTableRow("Uptime:", machineList.machineUptimeInd(ind) )
-      self.tableEnd()
+      # Check the ind
+      if ind < 0 :
+	 # Error(self.getBaseUrl())
+	 self.cssClass('Error %s ' %self.inUrl('error', 'Error'), 'tilasto')
+      else :
+	 self.cssStart('tilasto')
+	 self.lB()
+	 self.tableStart()
+	 self.addTableRow("Machine location:", machineList.machineLocationInd(ind) )
+	 self.addTableRow("Mchine contact:", machineList.machineContactInd(ind) )
+	 nlh = {}
+	 nlh = machineList.machineNetworkInd(ind)
+	 for e in (nlh) :
+	    self.addTableRow("Network adapter %s :" %e, nlh[e])
+	 self.addTableRow("Memory:", machineList.machineMemoryInd(ind) )
+	 self.addTableRow("System date:", machineList.machineSystemDateInd(ind) )
+	 self.addTableRow("Uptime:", machineList.machineUptimeInd(ind) )
+	 self.tableEnd()
 
 class doMachineList(Render) :
    # This class creates a page, which we show to user.
@@ -305,69 +310,12 @@ class doMachineList(Render) :
 
    def addBasicInfo(self, machineList, ind):
       # Called with the name the LIST and index of the machine we want to see on page
-      # self.header()
-      # koneet = self.koneet
       self.cssStart('tilasto')
       self.lB()
       print machineList.machineLocationInd(ind)
       self.lB()
       print machineList.machineContactInd(ind)
       self.lB()
-      # print "Debug: addBasicInfo() params:", machineName, ind
-      #print machineName.machineNameInd(ind)
-      #print self.objDiv()
-      # print "param: ", machineName," ind -> ", ind
-      #print machineName.machineLocationInd(ind)
-      # print "lalalal"
-      #print self.objDiv()
-      #print machineName.machineContactInd(ind)
-      #print self.objDiv()
-      #print machineName.machineNetworkInd(ind)
-      #print self.objDiv()
-      # print machineName.printAll(ind)
-      # print " </p>"
-
-   def addAllInfo(self, machineList, ind):
-      # Called with the name the LIST and index of the machine we want to see on page
-      self.cssStart('tilasto')
-      self.lB()
-      print machineList.machineLocationInd(ind)
-      self.lB()
-      print machineList.machineContactInd(ind)
-      self.lB()
-      nlh = {}
-      nlh = machineList.machineNetworkInd(ind)
-      for e in (nlh) :
-	 print nlh[e]
-	 self.lB()
-      self.lB()
-      print machineList.machineMemoryInd(ind)
-      self.lB()
-      print machineList.machineSystemDateInd(ind)
-      self.lB()
-      print machineList.machineUptimeInd(ind)
-
-
-   def lueFilut(self, hakemisto):
-      # Lukee hakemistossa olevien tiedostojen nimet ja polut talteen
-      filukkeet = hakemisto
-      # print "Debug: lueFilut() -> parametri: hakemisto -> ", hakemisto
-      try:
-	 snmpfilut1 = dircache.listdir(hakemisto)
-	 snmpfilut1 = snmpfilut1[:]  # jotta voidaan muokata listaa
-	 # print "Debug: lueFilut() -> dircache -> tulos2: ", snmpfilut1
-	 snmpfilut2 = []
-	 for fil in snmpfilut1:
-	    withdir = hakemisto + '/' + fil
-	    # print "Debug: koko -> ",withdir
-	    snmpfilut2.insert(snmpfilut1.index(fil), hakemisto + '/' + fil)
-	 # print "Debug: lueFilut() -> dircache -> tulos3: ", snmpfilut2
-      except IOError, err:
- 	 print 'Couldnt open the snmp-results-file-directory (%r).' % ('hakemisto',), err
-
-      return snmpfilut2
-      #return self.lista
-
 
 class doConfigPage(Render) :
 
@@ -384,7 +332,7 @@ class Error(Render):
 
     def __init__(self, text):
         self.text = text
-        Render.__init__(self, jotain)
+        Render.__init__(self, text)
         self.prefix = [
             'Ongelmia jäsennyksessä',
             'Kärpänen',
@@ -393,11 +341,9 @@ class Error(Render):
             'Fehler',
             'Kone on tätä mieltä',
             'Saisit puolestani jatkaa, mutta',
-            'Voi vittu',
-            'Nyt ei oikein näytä sujuvan, ehkä sun kannatais mennä muualle'
             ]
 
-    def doPage(self):
+    def doPage(self, something):
         self.header()
         self.cssClass("<b>%s:</b> %s" % (random.choice(self.prefix), self.text), 'virhe')
         self.footer()

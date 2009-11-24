@@ -55,6 +55,7 @@ urls['konelista'] = sivuParseri.doMachineList(contextRoot)
 urls['kone'] = sivuParseri.doMachineList(contextRoot)
 urls['server'] = sivuParseri.doServerPage(contextRoot)
 urls['config'] = sivuParseri.doConfigPage(contextRoot)
+urls['error'] = sivuParseri.Error(contextRoot)
 
 # if urls.has_key(path[0]):
 if urls.has_key(path[0]):
