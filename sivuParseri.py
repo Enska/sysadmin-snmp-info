@@ -42,9 +42,9 @@ class Render:
     def footer(self):
         self.cssEnd()
         # self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url(self.baseUrl0,'Footer part'), 'footer')
-	self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url(self.getBaseUrl(),'Footer part'), 'footer')
+	self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url(self.getBaseUrl(),'Frontpage'), 'footer')
 	# self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url('testi','Footer part'), 'footer')
-	print "getBaseUrl: %s" % self.getBaseUrl()
+	# print "getBaseUrl: %s" % self.getBaseUrl()
         print "</body>"
         print "</html>"
 
@@ -168,6 +168,13 @@ class prepData(Render) :
       # self.bigList = snmpParseri.Parser(self.kojeet)
       # print "prepData::__init__ tester"
 
+   def listConfigData(self):
+      # Read all the files for manipulating
+
+      #resConfigList = jokuluokka.Parser(self.resFiles)
+      return resList
+
+
    def listData(self):
       # Read all the files for manipulating
       # resFiles = self.listFiles(ds)
@@ -222,7 +229,6 @@ class doServerPage(Render) :
       print "%s" % server
       self.bEnd()
       self.addAllServerInfo(self, server)
-      self.cssClass('Server page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
       self.cssClass('Test underpage | %s ' %self.inUrl('kone', 'Kaikki koneet'), 'tilasto')
       self.footer()
 
@@ -234,7 +240,8 @@ class doServerPage(Render) :
       # Check the ind
       if ind < 0 :
 	 # Error(self.getBaseUrl())
-	 self.cssClass('Error %s ' %self.inUrl('error', 'Error'), 'tilasto')
+	 # self.cssClass('Error %s ' %self.inUrl('error', 'Error'), 'tilasto')
+	 Error("ei suju").doPage("addAllServerInfo")
       else :
 	 self.cssStart('tilasto')
 	 self.lB()
@@ -321,19 +328,166 @@ class doConfigPage(Render) :
 
    def __init__(self, jep):
       Render.__init__(self, jep)
+      self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      # Create one big hash-list of machineinformation
+      self.bigList = snmpParseri.Parser(self.ds.getFilesList())
 
    def doPage(self, something) :
+
+      kojeet = self.ds.getFilesList()
+      bigList = self.bigList
+
       self.header()
-      print "<p> Config-page to handle settings of clients. </p>"
+      cou = 0
+      allmac = len(kojeet)
+      contlist = []
+
+      print "<form name=\"input\" action=\"%s\" method=\"post\">" % (self.baseUrl+"/update")
+      print "Koje: <input type=\"text\" name=\"server\"/>"
+
+      self.tableStart()
+      self.tableRowStart()
+      self.tableCellStart()
+      print "Num"
+      self.tableCellEnd()
+      self.tableCellStart()
+      print "Server name"
+      self.tableCellEnd()
+      self.tableRowEnd()
+      for i in kojeet:
+	 self.tableRowStart()
+	 self.tableCellStart()
+	 print cou + 1
+	 self.tableCellEnd()
+	 self.tableCellStart()
+	 self.bStart()
+	 mac = bigList.machineNameInd(cou)
+	 print "%s" % self.inUrl("server/" + mac, mac)
+	 self.bEnd()
+	 # print "(machine no:", cou+1 ,")"
+	 self.tableCellEnd()
+	 self.tableCellStart()
+	 # print "<button type=\"radio\" value=\"mac\" />";
+	 print "<input type=\"radio\" name=\"mac\" value=\"mac\" />" ;
+	 self.tableCellEnd()
+	 self.tableRowEnd()
+	 cou = cou + 1
+      self.tableEnd()
+      # print "</input >"
+
+      print "<input type=\"submit\" value=\"Muokkaa\"/>";
+      print "</form>"
+
+      self.addInfo("testi")
       self.cssClass('Config-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
       self.footer()
 
-class Error(Render):
+   def addInfo(self, mach):
 
-    def __init__(self, text):
-        self.text = text
-        Render.__init__(self, text)
-        self.prefix = [
+      self.eds = prepData("/var/www/tommi/etc")
+      print "Config-filut: %s \n" % self.eds
+
+      self.emplist = {}
+      self.emplist["name"] = "koneen nimi"
+      self.emplist["ip"] = "lisaa ip"
+      self.emplist["dns"] = "palvelimen dns nimi"
+      self.emplist["snmpver"] = "snmp versio"
+      self.emplist["snmpcomm"] = "snmp community pharse"
+      self.emplist["1"] = "lisaa"
+      self.emplist["2"] = "lisaa"
+
+      # testing the function
+      self.doMachineForm(self.emplist)
+      # emplist["name", "ip", "phar", "snmpver"] = "koneen nimi", "koneen ip", "jotain", "jossain"
+      # print "list %s::%s" % (emplist.get("name", "nooooooo"), emplist.get("ip", "nooooooo"))
+
+      if (mach == "uusi") :
+	 # This is a new machine, no data to fetch
+	 print "uutta dataa"
+	 #print "list %s" % emplist
+	 self.doMachineForm(emplist)
+
+      else:
+	 # This is an old machine, fetch data and show it to the user
+	 self.lB()
+	 print "Vanhaa dataa."
+
+
+   def doMachineForm(self, datalist):
+      # Create form with the data we received
+      # maybe this could be done with javascript or similar?
+      dsli = datalist
+      print "<p>Give information for the new machine.	</p>"
+      print "<form name=\"input\" action=\"%s\" method=\"post\">" % (self.baseUrl+"/savedata")
+      for ri in (datalist):
+	 # TO-DO: the correct way to submit the data.
+	 print "%s: <input type=\"text\" name=\"machine\" value=\"%s\" /> %s" % (ri, ri, dsli.get(ri, "Errrr"))
+	 self.lB()
+
+      print "<input type=\"submit\" value=\"Save data\"/>";
+      print "<input type=\"reset\" value=\"Cancel (clear data)\"/>";
+      print "</form>"
+      self.cssClass('Config-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
+      self.footer()
+
+
+class doSaveDataPage(Render) :
+
+   def __init__(self, URL):
+      Render.__init__(self, URL)
+      #mes = self.messa
+      # self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      # self.bigList = snmpParseri.Parser(self.ds.getFilesList())
+
+   def doPage(self, data):
+      # TO-DO: how to give data to be saved.
+      self.header()
+      self.cssClass('Reply-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
+      print "<p>Data save has been tried.</p>"
+      print "<p> This data is to be saved: %s "% (data)
+      self.footer()
+
+
+class doDebugPage(Render) :
+
+   def __init__(self, URL, messa):
+      Render.__init__(self, URL)
+      #mes = self.messa
+      # self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      # self.bigList = snmpParseri.Parser(self.ds.getFilesList())
+
+   def doPage(self, URL, messa):
+      #@params: name of server or instance
+      #@return: None
+      self.header()
+      self.cssClass('DEBUG-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
+      print "<p> This Debug page. For some reason you have wanted this page to be shown... </p>"
+      self.bStart()
+      print "<p>"
+      print "Debug context-root: "
+      self.lB()
+      print "%s" % self.getContextRoot()
+      self.lB()
+      self.lB()
+      print "Debug URL: "
+      self.lB()
+      print "%s" % URL
+      self.lB()
+      self.lB()
+      print "Debug message:"
+      self.lB()
+      print "%s" % messa
+      print "</p>"
+      self.bEnd()
+      self.lB()
+      self.footer()
+
+
+class Error(Render):
+   def __init__(self, text):
+      self.text = text
+      Render.__init__(self, text)
+      self.prefix = [
             'Ongelmia jäsennyksessä',
             'Kärpänen',
             'Järjestelmä huumeessa',
@@ -343,7 +497,8 @@ class Error(Render):
             'Saisit puolestani jatkaa, mutta',
             ]
 
-    def doPage(self, something):
-        self.header()
-        self.cssClass("<b>%s:</b> %s" % (random.choice(self.prefix), self.text), 'virhe')
-        self.footer()
+   def doPage(self, message):
+      self.header()
+      self.cssClass("%s -> " % message, 'testi')
+      # self.cssClass("%s -> <b>%s:</b> %s" % message, (random.choice(self.prefix), self.text), 'virhe')
+      self.footer()

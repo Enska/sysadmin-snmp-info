@@ -46,8 +46,14 @@ contextRoot = "http://localhost/tommi/index.py"
 
 urls = {}
 fs = cgi.FieldStorage(keep_blank_values=1)
-# = "testi"
-# turha= "joo"
+
+# variable for debug message
+# messag = "Debug: index.py call: urls[%s].doPage(%s) " % (path[0], path[:1])
+messag = "Debug: index.py call: urls[%s].doPage(%s) " % (path[0], path[:1])
+jj = 0
+for hh in (path):
+   messag = messag + "<br> param %s: %s " % (jj,hh)
+   jj+=1
 
 # Here we call the method to create a TeeKoneLista object, which has the information in
 urls['/'] = sivuParseri.doBasicPage(contextRoot)
@@ -55,6 +61,8 @@ urls['konelista'] = sivuParseri.doMachineList(contextRoot)
 urls['kone'] = sivuParseri.doMachineList(contextRoot)
 urls['server'] = sivuParseri.doServerPage(contextRoot)
 urls['config'] = sivuParseri.doConfigPage(contextRoot)
+urls['savedata'] = sivuParseri.doSaveDataPage(contextRoot)
+urls['debug'] = sivuParseri.doDebugPage(contextRoot, messag)
 urls['error'] = sivuParseri.Error(contextRoot)
 
 # if urls.has_key(path[0]):
@@ -64,11 +72,22 @@ if urls.has_key(path[0]):
       # Special case, this needs also the servername
       #urls[path[0]].doPage(path[1:], path[2:])
    #else:
-      # print "Debug: call: urls[%s].doPage(path[1:]) "%  path[0]
-      urls[path[0]].doPage(path[1:])
+   #print "Debug: call: urls[%s].doPage(%s) " % (path[0], path[1:])
+
+   # The debug way to call. Uncomment this to see first the debug, then
+   # the normal page as.
+   urls['debug'].doPage(path[1:], messag)
+
+   # The normal way to call
+   urls[path[0]].doPage(path[1:])
 
 else:
    # print "Debug: Default action on index.py"
+   # The debug way to call. Uncomment this to see first the debug, then
+   # the normal page as.
+   urls['debug'].doPage(path[1:], messag)
+
+   # The normal way to call
    urls['/'].doPage()
 
 # urls['konelista'].doPage()
@@ -87,3 +106,4 @@ else:
 #urls['pelaaja'] = renderPelaaja()
 #urls['peli'] = renderPeli()
 # print index
+
