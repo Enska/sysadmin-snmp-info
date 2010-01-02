@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 #
-# Originaali versio 1.0 - Petteri Klemola
-# Nykyinen versio 1.1 - Tommi Ruuth
+# Original version 1.0 - Petteri Klemola
+# Current version 1.1 - Tommi Ruuth
 #
-# Saatu luvalla, otettu käyttöön soveltuvin osin ja muokattu edelleen. -TR 20081002
+# Got to be used on permission, modified as needed. -TR 20091002
 #
 
-# TODO
+# TODO:
 # -snmpkyselyt -> ehkä cron-skripti?
 # -config handling for servers and other clients
 # -inner links between pages
@@ -62,6 +62,7 @@ urls['kone'] = sivuParseri.doMachineList(contextRoot)
 urls['server'] = sivuParseri.doServerPage(contextRoot)
 urls['config'] = sivuParseri.doConfigPage(contextRoot)
 urls['savedata'] = sivuParseri.doSaveDataPage(contextRoot)
+urls['update'] = sivuParseri.doBasicPage(contextRoot)
 urls['debug'] = sivuParseri.doDebugPage(contextRoot, messag)
 urls['error'] = sivuParseri.Error(contextRoot)
 
@@ -74,12 +75,29 @@ if urls.has_key(path[0]):
    #else:
    #print "Debug: call: urls[%s].doPage(%s) " % (path[0], path[1:])
 
-   # The debug way to call. Uncomment this to see first the debug, then
-   # the normal page as.
+   # The debug way to call. Comment/uncomment this to see first the debug-page, then
+   # the normal page under the debug page.
    urls['debug'].doPage(path[1:], messag)
 
-   # The normal way to call
-   urls[path[0]].doPage(path[1:])
+   if (path[0] == "savedata" ):
+      print "index-debug: path: %s \n <br>" % path
+      form = cgi.FieldStorage()
+      tt1 = form.getfirst('machine', "ERR: got nothing from html-form")
+      print "index-debug: input: %s \n <br>" % tt1
+      #for pl in form.getlist('input')
+	 # print "index-debug: %s" % pl
+
+   if (path[0] == "update" ):
+      print "index-debug: path: %s \n <br>" % path
+      form = cgi.FieldStorage()
+      tt1 = form.getfirst('server', "ERR: got nothing from html-form")
+      print "index-debug: input: %s \n <br>" % tt1
+      #for pl in form.getlist('input')
+	 # print "index-debug: %s" % pl
+
+   else:
+      # The normal way to call
+      urls[path[0]].doPage(path[1:])
 
 else:
    # print "Debug: Default action on index.py"

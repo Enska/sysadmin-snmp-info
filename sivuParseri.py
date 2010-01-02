@@ -12,6 +12,8 @@ import datetime
 import random
 import struct
 import dircache
+import cgi
+import cgitb; cgitb.enable()
 # Omat luokat:
 # import dbHandler
 # import utils
@@ -41,10 +43,11 @@ class Render:
 
     def footer(self):
         self.cssEnd()
-        # self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url(self.baseUrl0,'Footer part'), 'footer')
-	self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url(self.getBaseUrl(),'Frontpage'), 'footer')
+	bsu = self.url(self.getBaseUrl(),'Frontpage')
+	bso = self.inUrl('kone', 'All machines')
+	bsi = self.inUrl('config', 'Handle machines')
+	self.cssClass('%(1)s | %(2)s | %(3)s <br> Maintainer: enska AT medusapistetutkapistefi' % {'1':bsu, '2':bso, '3':bsi}, 'footer')
 	# self.cssClass('Maintainer: enskaätmedusapistetutkapistefi | %s' % self.url('testi','Footer part'), 'footer')
-	# print "getBaseUrl: %s" % self.getBaseUrl()
         print "</body>"
         print "</html>"
 
@@ -151,9 +154,9 @@ class doBasicPage(Render) :
    def doPage(self) :
       self.header()
       self.cssClass('To-be-named-better-project | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
-      print "<p>Welcome to a to-be-named-better-project, which intends to produce a small sys admin tool. Idea of the tool is to collect server/switch/snmp-enabled machine data and show it as nice web-page. The collecting of data is done with snmp-protocol and this is the only method that is supported.</p>"
-      self.cssClass('Machine list page | %s ' %self.inUrl('kone', 'All the machines'), 'tilasto')
-      self.cssClass('Test underpage | %s ' %self.inUrl('config', 'Config / settings'), 'tilasto')
+      print "<p>Welcome to a to-be-named-better-project's frontpage. <br><br>This project intends to produce a small sys admin tool. Idea of the tool is to collect server/switch/snmp-enabled machine data and show it as nice web-page. The collecting of data is done with snmp-protocol and this is the only method that is supported.</p>"
+      self.cssClass('Machine list page | %s ' % self.inUrl('kone', 'All the machines'), 'tilasto')
+      self.cssClass('Test underpage | %s ' % self.inUrl('config', 'Config / settings'), 'tilasto')
       self.footer()
 
 class prepData(Render) :
@@ -187,15 +190,21 @@ class prepData(Render) :
 
    def listFiles(self, dirr):
       # Read all the filenames and full paths to a list and returns this
+      snmpfilut2 = []
       try:
 	 snmpfilut1 = dircache.listdir(dirr)
-	 snmpfilut1 = snmpfilut1[:]  # jotta voidaan muokata listaa
-	 snmpfilut2 = []
-	 for fil in snmpfilut1:
-	    withdir = dirr + '/' + fil
-	    snmpfilut2.insert(snmpfilut1.index(fil), dirr + '/' + fil)
+	 # TO-DO: dircache is to be deprecated on ptyhon 2.6, this has to be changed...
+	 l = len(snmpfilut1)
+	 # print "filut: %(1)s , len -> %(2)s <br>" % { '1':snmpfilut1, '2':l }
+	 if ( len(snmpfilut1) > 0 ):
+	    snmpfilut1 = snmpfilut1[:] # jotta voidaan muokata listaa
+	    for fil in snmpfilut1:
+	       withdir = dirr + '/' + fil
+	       snmpfilut2.insert(snmpfilut1.index(fil), dirr + '/' + fil)
+	 else:
+	    snmpfilut2.insert(1, "No files to read at directory %s ." % dirr)
       except IOError, err:
- 	 print 'Couldnt open the snmp-results-file-directory (%r).' % ('dirr',), err
+	print 'Couldnt open the snmp-results-file-directory (%r).' % ('dirr',), err
 
       return snmpfilut2
 
@@ -334,21 +343,23 @@ class doConfigPage(Render) :
 
    def doPage(self, something) :
 
+      self.header()
+      self.cssClass('Config-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
+
       kojeet = self.ds.getFilesList()
       bigList = self.bigList
 
-      self.header()
       cou = 0
       allmac = len(kojeet)
       contlist = []
 
       print "<form name=\"input\" action=\"%s\" method=\"post\">" % (self.baseUrl+"/update")
-      print "Koje: <input type=\"text\" name=\"server\"/>"
+      print "Machine: <input type=\"text\" name=\"server\"/>"
 
       self.tableStart()
       self.tableRowStart()
       self.tableCellStart()
-      print "Num"
+      print "Number"
       self.tableCellEnd()
       self.tableCellStart()
       print "Server name"
@@ -378,23 +389,28 @@ class doConfigPage(Render) :
       print "<input type=\"submit\" value=\"Muokkaa\"/>";
       print "</form>"
 
-      self.addInfo("testi")
-      self.cssClass('Config-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
+      # testing the form page
+      self.addMachineInfoForm("testi")
+
+
       self.footer()
 
-   def addInfo(self, mach):
+   def addMachineInfoForm(self, mach):
 
       self.eds = prepData("/var/www/tommi/etc")
-      print "Config-filut: %s \n" % self.eds
+      self.lili = self.eds.getFilesList()
+      print "Machine config-files: <br>"
+      for lin in self.lili:
+	 print "%s <br> \n" % lin
 
       self.emplist = {}
-      self.emplist["name"] = "koneen nimi"
-      self.emplist["ip"] = "lisaa ip"
-      self.emplist["dns"] = "palvelimen dns nimi"
-      self.emplist["snmpver"] = "snmp versio"
-      self.emplist["snmpcomm"] = "snmp community pharse"
-      self.emplist["1"] = "lisaa"
-      self.emplist["2"] = "lisaa"
+      self.emplist["name"] = "Describing name of the machine."
+      self.emplist["ip"] = "IP"
+      self.emplist["dns"] = "Network name of the machine."
+      self.emplist["snmpver"] = "Version of snmp (v2 only)."
+      self.emplist["snmpcomm"] = "Snmp community pharse."
+      self.emplist["1"] = "tba"
+      self.emplist["2"] = "tba"
 
       # testing the function
       self.doMachineForm(self.emplist)
@@ -403,32 +419,35 @@ class doConfigPage(Render) :
 
       if (mach == "uusi") :
 	 # This is a new machine, no data to fetch
-	 print "uutta dataa"
+	 print "New data..."
 	 #print "list %s" % emplist
 	 self.doMachineForm(emplist)
 
       else:
 	 # This is an old machine, fetch data and show it to the user
 	 self.lB()
-	 print "Vanhaa dataa."
+	 print "Old data..."
 
 
    def doMachineForm(self, datalist):
       # Create form with the data we received
       # maybe this could be done with javascript or similar?
       dsli = datalist
-      print "<p>Give information for the new machine.	</p>"
-      print "<form name=\"input\" action=\"%s\" method=\"post\">" % (self.baseUrl+"/savedata")
+      self.lB()
+      # target = (self.baseUrl+"/savedata")
+      target = "http://localhost/tommi/formHandler.py"
+      print "<p>Give information for the new machine. This is send to %s </p>"  % target
+      print "<form name=\"id=newdata\" action=\"%s\" method=\"post\">" % target
       for ri in (datalist):
+	 # create a html FORM for new machine information
 	 # TO-DO: the correct way to submit the data.
-	 print "%s: <input type=\"text\" name=\"machine\" value=\"%s\" /> %s" % (ri, ri, dsli.get(ri, "Errrr"))
+	 # print "%s: <input type=\"text\" name=\"machine\" value=\"%s\" /> %s" % (ri, ri, dsli.get(ri, "Errrr"))
+	 print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"%(1)s\" /> %(2)s" % { '1':ri, '2':dsli.get(ri, "Errrr")}
 	 self.lB()
 
       print "<input type=\"submit\" value=\"Save data\"/>";
       print "<input type=\"reset\" value=\"Cancel (clear data)\"/>";
       print "</form>"
-      self.cssClass('Config-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
-      self.footer()
 
 
 class doSaveDataPage(Render) :
@@ -439,12 +458,24 @@ class doSaveDataPage(Render) :
       # self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
       # self.bigList = snmpParseri.Parser(self.ds.getFilesList())
 
+      # create storage (example from http://python.about.com/od/cgiformswithpython/ss/pycgitut1_2.htm )
+      # form = cgi.FieldStorage()
+      # t1 = form.getvalue('input')
+      # t1 = form.getfirst('machine')
+
    def doPage(self, data):
-      # TO-DO: how to give data to be saved.
+      # TODO: how to give data to be saved.
+
+      # create storage (example from http://python.about.com/od/cgiformswithpython/ss/pycgitut1_2.htm )
+      form = cgi.FieldStorage()
+      # t1 = form.getvalue('machine')
+      t1 = form.getfirst('machine')
+
       self.header()
       self.cssClass('Reply-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
       print "<p>Data save has been tried.</p>"
-      print "<p> This data is to be saved: %s "% (data)
+      print "<p>This data is to be saved: %s </p>"% (data)
+      print "<p>test: %s  </p>" % t1
       self.footer()
 
 
@@ -461,7 +492,7 @@ class doDebugPage(Render) :
       #@return: None
       self.header()
       self.cssClass('DEBUG-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
-      print "<p> This Debug page. For some reason you have wanted this page to be shown... </p>"
+      print "<p> This is Debug page. <br> It is shown because it is uncommented from the index-page.</p>"
       self.bStart()
       print "<p>"
       print "Debug context-root: "
