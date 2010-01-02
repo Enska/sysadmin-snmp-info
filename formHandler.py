@@ -26,6 +26,8 @@ key = "id=newdata"
 
 print "Content-Type: text/html \n"
 print "<html><head> </head><body><h4>formHandler.py</h4>"
+print "debug: form.FieldStorage: %s \n <br>" % form
+
 print "debug: path: %s \n <br>" % path
 if not (form.has_key(key)):
    print "ERROR, no key \"%s\" on the form we got... <br> \n" % key

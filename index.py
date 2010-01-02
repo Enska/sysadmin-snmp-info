@@ -37,15 +37,17 @@ if os.environ.has_key('PATH_INFO'):
    path = os.environ['PATH_INFO'].split('/')[1:]
    # print "Debug: path -> %s"% path
 
+# TODO: this should be dynamic, not static
 # contextRoot = os.environ['PATH_INFO']
 contextRoot = "http://localhost/tommi/index.py"
 
-#
 #for param in os.environ.keys():
 #    print "%20s %s" % (param,os.environ[param])
 
 urls = {}
-fs = cgi.FieldStorage(keep_blank_values=1)
+
+# if there was form with the url, take to be passed on
+filledForm = cgi.FieldStorage(keep_blank_values=1)
 
 # variable for debug message
 # messag = "Debug: index.py call: urls[%s].doPage(%s) " % (path[0], path[:1])
@@ -61,7 +63,7 @@ urls['konelista'] = sivuParseri.doMachineList(contextRoot)
 urls['kone'] = sivuParseri.doMachineList(contextRoot)
 urls['server'] = sivuParseri.doServerPage(contextRoot)
 urls['config'] = sivuParseri.doConfigPage(contextRoot)
-urls['savedata'] = sivuParseri.doSaveDataPage(contextRoot)
+urls['savedata'] = sivuParseri.doSaveDataPage(contextRoot, filledForm)
 urls['update'] = sivuParseri.doBasicPage(contextRoot)
 urls['debug'] = sivuParseri.doDebugPage(contextRoot, messag)
 urls['error'] = sivuParseri.Error(contextRoot)
@@ -79,11 +81,11 @@ if urls.has_key(path[0]):
    # the normal page under the debug page.
    urls['debug'].doPage(path[1:], messag)
 
-   if (path[0] == "savedata" ):
-      print "index-debug: path: %s \n <br>" % path
-      form = cgi.FieldStorage()
-      tt1 = form.getfirst('machine', "ERR: got nothing from html-form")
-      print "index-debug: input: %s \n <br>" % tt1
+#   if (path[0] == "savedata" ):
+#      print "index-debug: path: %s \n <br>" % path
+#      form = cgi.FieldStorage()
+#      tt1 = form.getfirst('machine', "ERR: got nothing from html-form")
+#      print "index-debug: input: %s \n <br>" % tt1
       #for pl in form.getlist('input')
 	 # print "index-debug: %s" % pl
 

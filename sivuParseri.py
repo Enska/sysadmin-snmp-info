@@ -13,7 +13,8 @@ import random
 import struct
 import dircache
 import cgi
-import cgitb; cgitb.enable()
+# not needed here, form are handled on index-class
+# import cgitb; cgitb.enable()
 # Omat luokat:
 # import dbHandler
 # import utils
@@ -397,7 +398,7 @@ class doConfigPage(Render) :
 
    def addMachineInfoForm(self, mach):
 
-      self.eds = prepData("/var/www/tommi/etc")
+      self.eds = prepData("/var/www/tommi/data")
       self.lili = self.eds.getFilesList()
       print "Machine config-files: <br>"
       for lin in self.lili:
@@ -434,15 +435,15 @@ class doConfigPage(Render) :
       # maybe this could be done with javascript or similar?
       dsli = datalist
       self.lB()
-      # target = (self.baseUrl+"/savedata")
-      target = "http://localhost/tommi/formHandler.py"
+      target = (self.baseUrl+"/savedata")
+      # For testing, there is additional python class
+      # target = "http://localhost/tommi/formHandler.py"
       print "<p>Give information for the new machine. This is send to %s </p>"  % target
       print "<form name=\"id=newdata\" action=\"%s\" method=\"post\">" % target
       for ri in (datalist):
 	 # create a html FORM for new machine information
-	 # TO-DO: the correct way to submit the data.
 	 # print "%s: <input type=\"text\" name=\"machine\" value=\"%s\" /> %s" % (ri, ri, dsli.get(ri, "Errrr"))
-	 print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"%(1)s\" /> %(2)s" % { '1':ri, '2':dsli.get(ri, "Errrr")}
+	 print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':ri, '2':dsli.get(ri, "Errrr")}
 	 self.lB()
 
       print "<input type=\"submit\" value=\"Save data\"/>";
@@ -452,30 +453,59 @@ class doConfigPage(Render) :
 
 class doSaveDataPage(Render) :
 
-   def __init__(self, URL):
+   def __init__(self, URL, dataFromForm):
       Render.__init__(self, URL)
-      #mes = self.messa
-      # self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
-      # self.bigList = snmpParseri.Parser(self.ds.getFilesList())
+      self.filledForm = dataFromForm
+      self.valuesList = {}
+      # print "Content-Type: text/html \n"
+      # print "Deb: %s <br> \n" % dataFromForm
 
-      # create storage (example from http://python.about.com/od/cgiformswithpython/ss/pycgitut1_2.htm )
-      # form = cgi.FieldStorage()
-      # t1 = form.getvalue('input')
-      # t1 = form.getfirst('machine')
 
    def doPage(self, data):
-      # TODO: how to give data to be saved.
-
-      # create storage (example from http://python.about.com/od/cgiformswithpython/ss/pycgitut1_2.htm )
-      form = cgi.FieldStorage()
-      # t1 = form.getvalue('machine')
-      t1 = form.getfirst('machine')
+      # TODO: handle data
+      values = self.valuesList
+      formData = self.filledForm
 
       self.header()
       self.cssClass('Reply-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
-      print "<p>Data save has been tried.</p>"
-      print "<p>This data is to be saved: %s </p>"% (data)
-      print "<p>test: %s  </p>" % t1
+      print "<p>Data save has been tried, see results below.</p>"
+
+      values['hasData'] = 1
+      values['name'] = ""
+      values['ip'] = ""
+      values['dns'] = ""
+      values['snmpver'] = ""
+      values['snmpcomm'] = ""
+      values['1'] = ""
+      values['2'] = ""
+      # print "Debug: list: %s <br> \n" % formData
+
+      if ( len(formData) > 0 ):
+	 values['hasData'] = 0
+	 for valname in (values):
+	    # tt1 = formData.getfirst(valname, "ERR: got nothing from html-form")
+	    # print "debug: form: getfirst: (name) %s -> (value) %s \n <br>" % (valname, tt1)
+	    filledList = formData.getlist(valname)
+	    for pl in (filledList):
+	       if ( values[valname] == "" ):
+		  values[valname] = pl
+		  # print "Debug: values for-loop: %s <br><br> \n" % pl
+	       else:
+		  values[valname + pl] = pl
+
+      else:
+	 values['hasData'] = 1
+	 # print "ERROR: No html-form data reveived... <br> \n"
+
+      if (values['hasData'] == 0):
+	 print "<p>Data from FORM to be saved. <br> \n"
+	 for lk in (values):
+	    print " %s -> %s  <br> \n" % (lk, values[lk])
+	 print "</p>"
+
+      else:
+	 print "<p>ERROR: No data received from form... Nothing to save. </p> \n"
+
       self.footer()
 
 
