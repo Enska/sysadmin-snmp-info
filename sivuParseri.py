@@ -89,6 +89,15 @@ class Render:
 	 self.tableCellEnd()
 	 self.tableRowEnd()
 
+    def addListToTableRow(self, itemList):
+      self.tableRowStart()
+      for co in (itemList):
+	 self.tableCellStart()
+	 print co
+	 self.tableCellEnd()
+      self.tableRowEnd()
+
+
     def tableSStart(self):
         print "</div>"
 
@@ -404,6 +413,8 @@ class doConfigPage(Render) :
       for lin in self.lili:
 	 print "%s <br> \n" % lin
 
+      self.namelist = ['name', 'ip', 'dns', 'snmpver', 'snmpcomm', '1', '2', 'user', 'passu']
+
       self.emplist = {}
       self.emplist["name"] = "Describing name of the machine."
       self.emplist["ip"] = "IP"
@@ -412,12 +423,13 @@ class doConfigPage(Render) :
       self.emplist["snmpcomm"] = "Snmp community pharse."
       self.emplist["1"] = "tba"
       self.emplist["2"] = "tba"
+      self.emplist["user"] = "Your username for this page"
+      self.emplist["passu"] = "Your password to save data"
 
       # testing the function
       self.doMachineForm(self.emplist)
       # emplist["name", "ip", "phar", "snmpver"] = "koneen nimi", "koneen ip", "jotain", "jossain"
       # print "list %s::%s" % (emplist.get("name", "nooooooo"), emplist.get("ip", "nooooooo"))
-
       if (mach == "uusi") :
 	 # This is a new machine, no data to fetch
 	 print "New data..."
@@ -434,17 +446,51 @@ class doConfigPage(Render) :
       # Create form with the data we received
       # maybe this could be done with javascript or similar?
       dsli = datalist
+      namelist = self.namelist
       self.lB()
       target = (self.baseUrl+"/savedata")
       # For testing, there is additional python class
       # target = "http://localhost/tommi/formHandler.py"
       print "<p>Give information for the new machine. This is send to %s </p>"  % target
       print "<form name=\"id=newdata\" action=\"%s\" method=\"post\">" % target
-      for ri in (datalist):
+      self.tableStart()
+      for nametin in (namelist):
+	 print nametin,"<br>"
+	 self.a = [0,1,2]
+	 self.a[0] = "%s :" % nametin
+	 self.a[1] = "Testi <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" />" % { '1':nametin }
+	 self.a[2] = "%(2)s" % { '2':dsli.get(nametin, "Errrr") }
+	 self.addListToTableRow(self.a)
+
+      self.tableEnd()
+      self.lB()
+
+      # self.addTableRow(("%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" />" % '1':"name"), ("%(2)s" % '2':dsli.get("name", "Errrr")) )
+      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"ip", '2':dsli.get("ip", "Errrr") }
+      self.lB()
+      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"dns", '2':dsli.get("dns", "Errrr") }
+      self.lB()
+      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"snmpver", '2':dsli.get("snmpver", "Errrr") }
+      self.lB()
+      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"snmpcomm", '2':dsli.get("snmpcomm", "Errrr") }
+      self.lB()
+      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"1", '2':dsli.get("1", "Errrr") }
+      self.lB()
+      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"2", '2':dsli.get("2", "Errrr") }
+
+      # for jaj in sorted(set(dsli)):
+	 # print jaj
+
+      # Will not use loop, it prints all on wrong order and on sorted dict we have the same problem
+      # for ri in kiis :
 	 # create a html FORM for new machine information
 	 # print "%s: <input type=\"text\" name=\"machine\" value=\"%s\" /> %s" % (ri, ri, dsli.get(ri, "Errrr"))
-	 print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':ri, '2':dsli.get(ri, "Errrr")}
-	 self.lB()
+	 # print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':ri, '2':dsli.get(ri, "Errrr")}
+	 # print "ri -> %s : %s" % (ri, dsli[ri])
+	 # print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':dsli[ri], '2':dsli.get(ri, "Err")}
+
+
+      self.lB()
 
       print "<input type=\"submit\" value=\"Save data\"/>";
       print "<input type=\"reset\" value=\"Cancel (clear data)\"/>";
@@ -471,6 +517,8 @@ class doSaveDataPage(Render) :
       print "<p>Data save has been tried, see results below.</p>"
 
       values['hasData'] = 1
+      values['user'] = ""
+      values['passu'] = ""
       values['name'] = ""
       values['ip'] = ""
       values['dns'] = ""
