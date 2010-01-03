@@ -12,7 +12,7 @@ import datetime
 import random
 import struct
 import dircache
-import cgi
+# import cgi
 # not needed here, form are handled on index-class
 # import cgitb; cgitb.enable()
 # Omat luokat:
@@ -91,12 +91,17 @@ class Render:
 
     def addListToTableRow(self, itemList):
       self.tableRowStart()
-      for co in (itemList):
+      lislen = 10
+      if ( len(itemList) < lislen ):
+	 for co in (itemList):
+	    self.tableCellStart()
+	    print co
+	    self.tableCellEnd()
+      else:
 	 self.tableCellStart()
-	 print co
+	 print "Ups, too long list of data, will not add it to the table here... (max. length %s )" % lislen
 	 self.tableCellEnd()
       self.tableRowEnd()
-
 
     def tableSStart(self):
         print "</div>"
@@ -297,6 +302,7 @@ class doMachineList(Render) :
       kojeet = self.ds.getFilesList()
       bigList = self.bigList
       self.header()
+      self.cssClass('Machine / workstation / switch list | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
       self.cssStart('sisalto')
 
       print "<p> All the machines we have got information about. </p>"
@@ -367,31 +373,14 @@ class doConfigPage(Render) :
       print "Machine: <input type=\"text\" name=\"server\"/>"
 
       self.tableStart()
-      self.tableRowStart()
-      self.tableCellStart()
-      print "Number"
-      self.tableCellEnd()
-      self.tableCellStart()
-      print "Server name"
-      self.tableCellEnd()
-      self.tableRowEnd()
+      machlist = ["Number", "Server name", "Select one"]
+      self.addListToTableRow(machlist)
       for i in kojeet:
-	 self.tableRowStart()
-	 self.tableCellStart()
-	 print cou + 1
-	 self.tableCellEnd()
-	 self.tableCellStart()
-	 self.bStart()
+	 machlist[0] = cou + 1
 	 mac = bigList.machineNameInd(cou)
-	 print "%s" % self.inUrl("server/" + mac, mac)
-	 self.bEnd()
-	 # print "(machine no:", cou+1 ,")"
-	 self.tableCellEnd()
-	 self.tableCellStart()
-	 # print "<button type=\"radio\" value=\"mac\" />";
-	 print "<input type=\"radio\" name=\"mac\" value=\"mac\" />" ;
-	 self.tableCellEnd()
-	 self.tableRowEnd()
+	 machlist[1] = "<b> %s </b>" % self.inUrl("server/" + mac, mac)
+	 machlist[2] = "<input type=\"radio\" name=\"mac\" value=\"mac\" />"
+	 self.addListToTableRow(machlist)
 	 cou = cou + 1
       self.tableEnd()
       # print "</input >"
@@ -401,7 +390,6 @@ class doConfigPage(Render) :
 
       # testing the form page
       self.addMachineInfoForm("testi")
-
 
       self.footer()
 
@@ -416,17 +404,18 @@ class doConfigPage(Render) :
       self.namelist = ['name', 'ip', 'dns', 'snmpver', 'snmpcomm', '1', '2', 'user', 'passu']
 
       self.emplist = {}
-      self.emplist["name"] = "Describing name of the machine."
-      self.emplist["ip"] = "IP"
-      self.emplist["dns"] = "Network name of the machine."
-      self.emplist["snmpver"] = "Version of snmp (v2 only)."
-      self.emplist["snmpcomm"] = "Snmp community pharse."
-      self.emplist["1"] = "tba"
-      self.emplist["2"] = "tba"
-      self.emplist["user"] = "Your username for this page"
-      self.emplist["passu"] = "Your password to save data"
+      self.emplist[self.namelist[0]] = "Describing name of the machine."
+      self.emplist[self.namelist[1]] = "IP"
+      self.emplist[self.namelist[2]] = "Network name of the machine."
+      self.emplist[self.namelist[3]] = "Version of snmp (v2 only)."
+      self.emplist[self.namelist[4]] = "Snmp community pharse."
+      self.emplist[self.namelist[5]] = "tba"
+      self.emplist[self.namelist[6]] = "tba"
+      self.emplist[self.namelist[7]] = "Your username for this page"
+      self.emplist[self.namelist[8]] = "Your password to save data"
 
-      # testing the function
+      # testing the function, to see that the form works and saves dataFiles
+      # TODO: move the editing page on its own, either with old data or to have new data
       self.doMachineForm(self.emplist)
       # emplist["name", "ip", "phar", "snmpver"] = "koneen nimi", "koneen ip", "jotain", "jossain"
       # print "list %s::%s" % (emplist.get("name", "nooooooo"), emplist.get("ip", "nooooooo"))
@@ -455,41 +444,14 @@ class doConfigPage(Render) :
       print "<form name=\"id=newdata\" action=\"%s\" method=\"post\">" % target
       self.tableStart()
       for nametin in (namelist):
-	 print nametin,"<br>"
 	 self.a = [0,1,2]
 	 self.a[0] = "%s :" % nametin
-	 self.a[1] = "Testi <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" />" % { '1':nametin }
+	 self.a[1] = "<input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" />" % { '1':nametin }
 	 self.a[2] = "%(2)s" % { '2':dsli.get(nametin, "Errrr") }
 	 self.addListToTableRow(self.a)
 
       self.tableEnd()
       self.lB()
-
-      # self.addTableRow(("%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" />" % '1':"name"), ("%(2)s" % '2':dsli.get("name", "Errrr")) )
-      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"ip", '2':dsli.get("ip", "Errrr") }
-      self.lB()
-      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"dns", '2':dsli.get("dns", "Errrr") }
-      self.lB()
-      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"snmpver", '2':dsli.get("snmpver", "Errrr") }
-      self.lB()
-      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"snmpcomm", '2':dsli.get("snmpcomm", "Errrr") }
-      self.lB()
-      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"1", '2':dsli.get("1", "Errrr") }
-      self.lB()
-      print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':"2", '2':dsli.get("2", "Errrr") }
-
-      # for jaj in sorted(set(dsli)):
-	 # print jaj
-
-      # Will not use loop, it prints all on wrong order and on sorted dict we have the same problem
-      # for ri in kiis :
-	 # create a html FORM for new machine information
-	 # print "%s: <input type=\"text\" name=\"machine\" value=\"%s\" /> %s" % (ri, ri, dsli.get(ri, "Errrr"))
-	 # print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':ri, '2':dsli.get(ri, "Errrr")}
-	 # print "ri -> %s : %s" % (ri, dsli[ri])
-	 # print "%(1)s: <input type=\"text\" name=\"%(1)s\" value=\"test-%(1)s\" /> %(2)s" % { '1':dsli[ri], '2':dsli.get(ri, "Err")}
-
-
       self.lB()
 
       print "<input type=\"submit\" value=\"Save data\"/>";

@@ -70,42 +70,16 @@ urls['error'] = sivuParseri.Error(contextRoot)
 
 # if urls.has_key(path[0]):
 if urls.has_key(path[0]):
-   # Call the def_name.function
-   #if path[0] == "server":
-      # Special case, this needs also the servername
-      #urls[path[0]].doPage(path[1:], path[2:])
-   #else:
-   #print "Debug: call: urls[%s].doPage(%s) " % (path[0], path[1:])
 
-   # The debug way to call. Comment/uncomment this to see first the debug-page, then
+   # DEBUG: The debug-page to call. Comment/uncomment this to see first the debug-page, then
    # the normal page under the debug page.
-   urls['debug'].doPage(path[1:], messag)
-
-#   if (path[0] == "savedata" ):
-#      print "index-debug: path: %s \n <br>" % path
-#      form = cgi.FieldStorage()
-#      tt1 = form.getfirst('machine', "ERR: got nothing from html-form")
-#      print "index-debug: input: %s \n <br>" % tt1
-      #for pl in form.getlist('input')
-	 # print "index-debug: %s" % pl
-
-   if (path[0] == "update" ):
-      print "index-debug: path: %s \n <br>" % path
-      form = cgi.FieldStorage()
-      tt1 = form.getfirst('server', "ERR: got nothing from html-form")
-      print "index-debug: input: %s \n <br>" % tt1
-      #for pl in form.getlist('input')
-	 # print "index-debug: %s" % pl
-
-   else:
-      # The normal way to call
-      urls[path[0]].doPage(path[1:])
+   # urls['debug'].doPage(path[1:], messag)
+   urls[path[0]].doPage(path[1:])
 
 else:
-   # print "Debug: Default action on index.py"
    # The debug way to call. Uncomment this to see first the debug, then
-   # the normal page as.
-   urls['debug'].doPage(path[1:], messag)
+   # the normal DEFAULT page.
+   # urls['debug'].doPage(path[1:], messag)
 
    # The normal way to call
    urls['/'].doPage()
