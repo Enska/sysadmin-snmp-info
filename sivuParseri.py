@@ -36,6 +36,8 @@ class Render:
         self.cssPrefix = ""
 	# print "Debug:Render:__init__: url -> %s" % url
 	self.setBaseUrl(url)
+	# Mandatory config information
+	prepConfigs()
 
     def header(self):
         print "Content-Type: text/html \n"
@@ -180,6 +182,32 @@ class doBasicPage(Render) :
       self.cssClass('Machine list page | %s ' % self.inUrl('kone', 'All the machines'), 'tilasto')
       self.cssClass('Test underpage | %s ' % self.inUrl('config', 'Config / settings'), 'tilasto')
       self.footer()
+
+class prepConfigs(Render) :
+   def __init__(self):
+      # Read configurations from config-file. 
+      # This file and its directory are fixed to here
+      
+      # NOTE: relative path
+      self.confDir='etc'
+
+      # Lets check that directory exists
+      if ( os.path.exists(self.confDir)):
+	# Read files, create list of filenames
+	self.confFile = dataHandler.fileHandler(self.confDir, 'sai.cfg')
+      else:
+	# ERROR, this dir doesnt exist, create error message to be returned
+	errmsg = ["ERROR: Directory ("+self.confDir+") doesnt exist..."] 
+	self.confFile = errmsg
+	
+	
+   def getAllConf(self):
+
+      
+      # Ok. Lets return what ever we got...
+      return self.confFile
+
+
 
 class prepData(Render) :
   # NOTE: This one will be moved to dataHandler.py class

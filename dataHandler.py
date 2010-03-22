@@ -21,11 +21,18 @@ import sys
 class fileHandler:
   # This class/method os for FILE-listing 
   
-  def __init__(self, sourceDirectory):
+  def __init__(self, sourceDirectory, sourceFiles=None):
     # @param: The directry of the source-files
     # This one is mandatory. -> TODO: check the param
     self.sdir = sourceDirectory
-    self.sourceFiles = self.listFiles(sourceDirectory)  
+    if (sourceFiles==None):
+      # No file to read given, so we read ALL from sourceDirectory
+      self.sourceFiles = self.listFiles(sourceDirectory)  
+    else:
+      # TODO: Lets check that file exists
+      fil2 = []
+      fil2.append(sourceDirectory  + "/" + sourceFiles)
+      self.sourceFiles = fil2
     self.bigList =  {}
     cou = 0
 
@@ -41,19 +48,34 @@ class fileHandler:
     #
     # FIX: Do a check that the file is really a txt-file.
     #
-    print "Debug: dirikka -> %s <br> \n" % fileToRead
+    # print "Debug: dirikka -> %s <br> \n" % fileToRead
     self.lista = {}
     try:
       filu = open(fileToRead, 'r')
       # Do file-check here, before readeing the content
       
       for livi in filu.readlines() :
-	string.strip(livi)
-	key, value = self.fileLineSeparator(livi, ":")
-	self.lista[key] = value
+	if ( livi[:1] == '#' ):
+	  # Skip comment line
+	  continue
+	else :
+	  # string.strip(livi)
+	  livi.strip()
+	  # TODO: Remove linebreak...
+	  livi+=livi.replace("\n","")
+	  print "DEBUG: line -> \"%s\"" % livi
+	  if livi.count('=') > 0:
+	    self.sep='='
+	  else :
+	    self.sep=':'
+	  key, value = self.fileLineSeparator(livi, self.sep)
+	  self.lista[key] = value
       filu.close()
     except IOError, err:
-      print 'Couldnt open datafile %s directory: (%r). <br>\n' % (fileToRead, err)
+      self.lista[0] = 'Couldnt open datafile %s directory: (%r). <br>\n' % (fileToRead, err)
+      # pass
+      #print 'Couldnt open datafile %s directory: (%r). <br>\n' % (fileToRead, err)
+            
 
     return self.lista
 
@@ -65,6 +87,8 @@ class fileHandler:
     finres = ""
     if dataLine == '' :
       return "problem", "Line is empty"
+
+    print "DEBUG: line -> \"%s\"" % dataLine
     parts = dataLine.split(separator)
     return parts[0], parts[1]
 
