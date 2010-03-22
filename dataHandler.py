@@ -31,14 +31,15 @@ class fileHandler:
     else:
       # TODO: Lets check that file exists
       fil2 = []
-      fil2.append(sourceDirectory  + "/" + sourceFiles)
+      fil2.insert(0, sourceDirectory  + "/" + sourceFiles)
       self.sourceFiles = fil2
     self.bigList =  {}
     cou = 0
+    print "sourcefiles -> %s" % sourceFiles
 
     for sourceFile in self.sourceFiles:
       self.bigList[cou] = self.getDataFromFile(sourceFile)
-      #  print "Debug: one result (",cou,"): ", self.bigList[cou], "\n"
+      print "Debug: one result (",cou,"): ", self.bigList[cou], "\n"
       cou = cou + 1
     
 
@@ -47,15 +48,15 @@ class fileHandler:
     # returns it as a dict-list for the caller.
     #
     # FIX: Do a check that the file is really a txt-file.
-    #
-    # print "Debug: dirikka -> %s <br> \n" % fileToRead
+    #x
+    print "Debug: file to read -> %s <br> \n \n" % fileToRead
     self.lista = {}
     try:
       filu = open(fileToRead, 'r')
       # Do file-check here, before readeing the content
       
       for livi in filu.readlines() :
-	if ( livi[:1] == '#' ):
+	if ( livi[:1] == '#' ) :
 	  # Skip comment line
 	  continue
 	else :
@@ -63,12 +64,13 @@ class fileHandler:
 	  livi.strip()
 	  # TODO: Remove linebreak...
 	  livi+=livi.replace("\n","")
-	  print "DEBUG: line -> \"%s\"" % livi
+	  # print "DEBUG: line -> -%s- \n" % livi
 	  if livi.count('=') > 0:
 	    self.sep='='
 	  else :
 	    self.sep=':'
 	  key, value = self.fileLineSeparator(livi, self.sep)
+	  print "Debug: key -> %s, values -> %s \n" % (key,value)
 	  self.lista[key] = value
       filu.close()
     except IOError, err:
@@ -88,7 +90,7 @@ class fileHandler:
     if dataLine == '' :
       return "problem", "Line is empty"
 
-    print "DEBUG: line -> \"%s\"" % dataLine
+    # print "DEBUG: line -> \"%s\"" % dataLine
     parts = dataLine.split(separator)
     return parts[0], parts[1]
 
