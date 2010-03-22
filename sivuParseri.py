@@ -2,7 +2,7 @@
 # -*- coding: iso-8859-15 -*-
 #
 # Original class author: Petteri Klemola
-# Used, modified and published with permission for this use.
+# Used, modified and published with permission for this use by Tommi Ruuth.
 #
 # Author: Tommi Ruuth
 #
@@ -12,7 +12,13 @@ import datetime
 import random
 import struct
 import dircache
+import os.path
+import re
+
+# Maybe we need these too?
+import pickle
 # import cgi
+
 # not needed here, form are handled on index-class
 # import cgitb; cgitb.enable()
 # Omat luokat:
@@ -20,6 +26,7 @@ import dircache
 # import utils
 # SNMP-luokka, joka parseaa snmp-tuloksia
 import snmpParseri
+import dataHandler
 
 class Render:
    # Luokka joka rakentelee itseään kutsumalla nettisivun
@@ -175,23 +182,24 @@ class doBasicPage(Render) :
       self.footer()
 
 class prepData(Render) :
+  # NOTE: This one will be moved to dataHandler.py class
 
    def __init__(self, ds):
       # Prepare data for use
-      # Read files, create lists
-      # self.kojeet = self.listFiles("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
-      self.resFiles = self.listFiles(ds)
-
-      # Create one big hash-list of machineinformation
-      # self.bigList = snmpParseri.Parser(self.kojeet)
-      # print "prepData::__init__ tester"
+      # Lets check that directory exists
+      if ( os.path.exists(ds)):
+	# Read files, create list of filenames
+	self.resFiles = self.listFiles(ds)
+      else:
+	# ERROR, this dir doesnt exist, create error message to be returned
+	errmsg = ["ERROR: Directory ("+ds+") doesnt exist..."] 
+	self.resFiles = errmsg
 
    def listConfigData(self):
       # Read all the files for manipulating
 
       #resConfigList = jokuluokka.Parser(self.resFiles)
       return resList
-
 
    def listData(self):
       # Read all the files for manipulating
@@ -206,22 +214,74 @@ class prepData(Render) :
    def listFiles(self, dirr):
       # Read all the filenames and full paths to a list and returns this
       snmpfilut2 = []
-      try:
-	 snmpfilut1 = dircache.listdir(dirr)
-	 # TO-DO: dircache is to be deprecated on ptyhon 2.6, this has to be changed...
-	 l = len(snmpfilut1)
-	 # print "filut: %(1)s , len -> %(2)s <br>" % { '1':snmpfilut1, '2':l }
-	 if ( len(snmpfilut1) > 0 ):
-	    snmpfilut1 = snmpfilut1[:] # jotta voidaan muokata listaa
-	    for fil in snmpfilut1:
-	       withdir = dirr + '/' + fil
-	       snmpfilut2.insert(snmpfilut1.index(fil), dirr + '/' + fil)
-	 else:
-	    snmpfilut2.insert(1, "No files to read at directory %s ." % dirr)
-      except IOError, err:
-	print 'Couldnt open the snmp-results-file-directory (%r).' % ('dirr',), err
+      if ( os.path.exists(dirr) == 1 ):
+	 try:
+	    snmpfilut1 = dircache.listdir(dirr)
+	    # TODO: dircache is to be deprecated on ptyhon 2.6, this has to be changed...
+	    l = len(snmpfilut1)
+	    # print "filut: %(1)s , len -> %(2)s <br>" % { '1':snmpfilut1, '2':l }
+	    if ( len(snmpfilut1) > 0 ):
+	       snmpfilut1 = snmpfilut1[:] # jotta voidaan muokata listaa
+	       for fil in snmpfilut1:
+		  withdir = dirr + '/' + fil
+		  snmpfilut2.insert(snmpfilut1.index(fil), dirr + '/' + fil)
+	    else:
+	       snmpfilut2.insert(1, "No files to read at directory %s ." % dirr)
+	 except IOError, err:
+	    print 'Couldnt open the file-directory (%r).' % ('dirr',), err
 
       return snmpfilut2
+
+
+class saveData(Render) :
+  # NOTE: This one will be moved to dataHandler.py class
+
+   def __init__(self, ds):
+      # Save data on the directory which is given as paremeter
+      # Read files, create lists, then save or update file
+      self.workDir = ds
+      # Lets check that directory exists
+      if ( os.path.exists(self.workDir)):
+	# Yep, get files if there are any
+	self.oldFilesList = prepData(self.workDir)
+      else:
+	# ERROR, this dir doesnt exist, print to screen
+	print "ERROR: Directory (%s) doesnt exist (check your configs). " % self.workDir
+
+   def listConfigData(self):
+      # Read all the files for manipulating
+      return resList
+
+   def getConfigFiles(self):
+      return oldFilesList
+
+   def saveDataToFile(self, filesDir, values):
+   # def saveDataToFile(self, oldFiles, values):
+      # Normal command to save data. Check is it new or old.
+      
+      # Old way
+      # oldFiles = self.oldFilesList
+      
+      self.filesDir = filesDir
+      self.values = values
+      workDir = self.workDir
+      # gl = re.compile('$(values['name']).conf')
+      gl = re.compile(values['name'])
+      print "Debug: saveDataToFile: saving data (%s)" % values['name']
+      # if ( len(filesDir) > 0 ):
+      for kl in (filesDir):
+	if ( gl.match(kl) ):
+	  # Old value, update file (name is used for the filename)
+	  print "lala, this file (%s) needs updating..." % kl
+	else:
+	  # new file, save it
+	  # resFile = open(values["name"], "w")
+	  resFile = open(os.path.join(filesDir, 'serverconfig-%s.conf' % values['name']), 'wb')
+	  for lk in (values):
+	    val = "%s:%s\n" % (lk, values[lk])
+	    resFile.write(val)
+	  resFile.close()
+
 
 class tester(Render):
    def __init__(self):
@@ -271,7 +331,7 @@ class doServerPage(Render) :
 	 self.lB()
 	 self.tableStart()
 	 self.addTableRow("Machine location:", machineList.machineLocationInd(ind) )
-	 self.addTableRow("Mchine contact:", machineList.machineContactInd(ind) )
+	 self.addTableRow("Machine contact:", machineList.machineContactInd(ind) )
 	 nlh = {}
 	 nlh = machineList.machineNetworkInd(ind)
 	 for e in (nlh) :
@@ -282,11 +342,11 @@ class doServerPage(Render) :
 	 self.tableEnd()
 
 class doMachineList(Render) :
-   # This class creates a page, which we show to user.
+   # This class/method creates a page, which we show to user.
 
-   def __init__(self,koneet):
+   def __init__(self, koneet):
       # Basic init-method. This is used on creation.
-      Render.__init__(self,koneet)
+      Render.__init__(self, koneet)
 
       # joku = tester()
       # print joku.retS("testiiii")
@@ -354,8 +414,10 @@ class doConfigPage(Render) :
    def __init__(self, jep):
       Render.__init__(self, jep)
       self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      self.confFiles = prepData("mach_confs")
       # Create one big hash-list of machineinformation
       self.bigList = snmpParseri.Parser(self.ds.getFilesList())
+
 
    def doPage(self, something) :
 
@@ -364,6 +426,16 @@ class doConfigPage(Render) :
 
       kojeet = self.ds.getFilesList()
       bigList = self.bigList
+      cofiles = self.confFiles.getFilesList()
+      confData = dataHandler.fileHandler("mach_confs")
+      # print "confs -> %s" % cofiles
+      for j in cofiles:
+	print "confs -> %s <br>" % j
+
+      print "data -> %s" % confData
+
+      #for j in confData:
+	#print "data -> %s <br>" % j
 
       cou = 0
       allmac = len(kojeet)
@@ -373,6 +445,22 @@ class doConfigPage(Render) :
       print "Machine: <input type=\"text\" name=\"server\"/>"
 
       self.tableStart()
+
+      # TODO: Instead of machines results, we want to use the info from server-configs.
+      # THe new way. MiddleOfProgress
+      machlist = ["Number", "Server name", "Select one"]
+      self.addListToTableRow(machlist)
+      #for i in cofiles:
+	 #machlist[0] = cou + 1
+	 #mac = bigList.machineNameInd(cou)
+	 #machlist[1] = "<b> %s </b>" % self.inUrl("server/" + mac, mac)
+	 ##machlist[2] = "<input type=\"radio\" name=\"mac\" value=\"mac\" />"
+	 #self.addListToTableRow(machlist)
+	 #cou = cou + 1
+      print "<br> tadaa <br>"
+      
+      #
+      # The old way
       machlist = ["Number", "Server name", "Select one"]
       self.addListToTableRow(machlist)
       for i in kojeet:
@@ -385,7 +473,7 @@ class doConfigPage(Render) :
       self.tableEnd()
       # print "</input >"
 
-      print "<input type=\"submit\" value=\"Muokkaa\"/>";
+      print "<input type=\"submit\" value=\"Modify\"/>";
       print "</form>"
 
       # testing the form page
@@ -406,7 +494,7 @@ class doConfigPage(Render) :
       self.emplist = {}
       self.emplist[self.namelist[0]] = "Describing name of the machine."
       self.emplist[self.namelist[1]] = "IP"
-      self.emplist[self.namelist[2]] = "Network name of the machine."
+      self.emplist[self.namelist[2]] = "DNS name of the machine."
       self.emplist[self.namelist[3]] = "Version of snmp (v2 only)."
       self.emplist[self.namelist[4]] = "Snmp community pharse."
       self.emplist[self.namelist[5]] = "tba"
@@ -465,6 +553,8 @@ class doSaveDataPage(Render) :
       Render.__init__(self, URL)
       self.filledForm = dataFromForm
       self.valuesList = {}
+      self.oldFiles = prepData("data")
+
       # print "Content-Type: text/html \n"
       # print "Deb: %s <br> \n" % dataFromForm
 
@@ -473,12 +563,17 @@ class doSaveDataPage(Render) :
       # TODO: handle data
       values = self.valuesList
       formData = self.filledForm
+      oldFiles = self.oldFiles
+      filesDir = 'mach_conf'
+      self.resultFile = ''
+      self.blaah = saveData("data")
 
       self.header()
       self.cssClass('Reply-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
       print "<p>Data save has been tried, see results below.</p>"
-
-      values['hasData'] = 1
+      
+      values['debug'] = 1 # Set to 0 to have dummy data
+      values['hasData'] = 1 # Set to 1, we dont know if there is any data
       values['user'] = ""
       values['passu'] = ""
       values['name'] = ""
@@ -504,17 +599,48 @@ class doSaveDataPage(Render) :
 		  values[valname + pl] = pl
 
       else:
-	 values['hasData'] = 1
+	 values['hasData'] = 1 # Set to 1, NO data
 	 # print "ERROR: No html-form data reveived... <br> \n"
+
+      if ( values['debug'] == 0 ):
+	values['hasData'] = 0 # Set to 0, we want see some data for debug reasons
+	values['user'] = "a1"
+	values['passu'] = "a2"
+	values['name'] = "a3"
+	values['ip'] = "a4"
+	values['dns'] = "a5"
+	values['snmpver'] = "a6"
+	values['snmpcomm'] = "a7"
+	values['1'] = "a8"
+	values['2'] = "a9"
 
       if (values['hasData'] == 0):
 	 print "<p>Data from FORM to be saved. <br> \n"
-	 for lk in (values):
-	    print " %s -> %s  <br> \n" % (lk, values[lk])
+
+	 # Check if it was old config (from the filename (not the best way...))
+	 # succ = self.blaah.saveDataToFile(oldFiles, values)
+	 succ = self.blaah.saveDataToFile(filesDir, values)
+	 # resFile = open(values["name"], "w")
+	 
+	 # Working way
+	 # resultFile = open(os.path.join('etc', 'filu1-%s' % values['name']), 'wb')
+	 # for lk in (values):
+	    # print " %s -> %s  <br> \n" % (lk, values[lk])
+	    # val = "%s : %s \n" % (lk, values[lk])
+	    # resultFile.write(val)
+	
+	 # resultFile.close()
+	    
+	    # Example code
+	    # commentfile = open(os.path.join(indexdir,'comment-%s' % filename), 'wb')
+	    # pickle.dump(comments, commentfile)
+	    # commentfile.close()
+
 	 print "</p>"
 
       else:
 	 print "<p>ERROR: No data received from form... Nothing to save. </p> \n"
+
 
       self.footer()
 

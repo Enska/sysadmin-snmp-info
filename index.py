@@ -39,7 +39,8 @@ if os.environ.has_key('PATH_INFO'):
 
 # TODO: this should be dynamic, not static
 # contextRoot = os.environ['PATH_INFO']
-contextRoot = "http://localhost/tommi/index.py"
+# contextRoot = "http://localhost/tommi/index.py"
+contextRoot = "http://localhost/snmpinfo/index.py"
 
 #for param in os.environ.keys():
 #    print "%20s %s" % (param,os.environ[param])
@@ -56,6 +57,10 @@ jj = 0
 for hh in (path):
    messag = messag + "<br> param %s: %s " % (jj,hh)
    jj+=1
+
+# For testing, force to use one url
+# path[0]='savedata'
+
 
 # Here we call the method to create a TeeKoneLista object, which has the information in
 urls['/'] = sivuParseri.doBasicPage(contextRoot)
