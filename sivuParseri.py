@@ -7,13 +7,13 @@
 # Author: Tommi Ruuth
 #
 
-import sys
 import datetime
-import random
-import struct
 import dircache
 import os.path
+import random
 import re
+import struct
+import sys
 
 # Maybe we need these too?
 import pickle
@@ -29,7 +29,7 @@ import snmpParseri
 import dataHandler
 
 class Render:
-   # Luokka joka rakentelee itseään kutsumalla nettisivun
+  # Luokka joka rakentelee itseään kutsumalla nettisivun
 
     def __init__(self, url):
         # @params: Base URL for this page
@@ -37,7 +37,10 @@ class Render:
 	# print "Debug:Render:__init__: url -> %s" % url
 	self.setBaseUrl(url)
 	# Mandatory config information
-	prepConfigs()
+	# TODO: This is now called multiple times. Only once is needed (if it is usable 
+	# for other objects also)
+	self.conf = prepConfigs()
+	
 
     def header(self):
         print "Content-Type: text/html \n"
@@ -122,10 +125,10 @@ class Render:
         print "<br />"
 
     def bStart(self):
-        print "<b>"
+        return "<b>"
 
     def bEnd(self):
-        print "</b>"
+        return "</b>"
 
     def objDiv(self):
         print " : "
@@ -184,6 +187,7 @@ class doBasicPage(Render) :
       self.footer()
 
 class prepConfigs(Render) :
+  
    def __init__(self):
       # Read configurations from config-file. 
       # This file and its directory are fixed to here
@@ -195,18 +199,48 @@ class prepConfigs(Render) :
       if ( os.path.exists(self.confDir)):
 	# Read files, create list of filenames
 	self.confFile = dataHandler.fileHandler(self.confDir, 'sai.cfg')
-      else:
+	#print "Debug: pituus -> %s " % (len(self.confFile))
+	#self.printAll()
+
+
+      # TODO: Check that the config-directories really do exist -> if not,
+      # filla with sensible error-message
+      #if (os.path.exists(self.getServerConfDir())):
+	# Read files, create list of filenames
+	
+      #else:
 	# ERROR, this dir doesnt exist, create error message to be returned
+	#errmsg = ["ERROR: Directory ("+ds+") doesnt exist..."] 
+	#self.resFiles = errmsg
+
+      else:
+	# ERROR, this dir doesnt exist, create error message instead of resultlist
 	errmsg = ["ERROR: Directory ("+self.confDir+") doesnt exist..."] 
 	self.confFile = errmsg
 	
+   def printAll(self):
+      confFile = self.confFile
+      # print "sivuParseri.py::prepConfigs::printAll: Debug:", confFile
+      print "sivuParseri.py::prepConfigs::printAll: Debug var: %s" % confFile.getVariableInd(0, "confDir")
+      print "sivuParseri.py::prepConfigs::printAll: Debug var: %s" % confFile.getVariableInd(0, "serverConfDir")
+      print "sivuParseri.py::prepConfigs::printAll: Debug var: %s" % confFile.getVariableInd(0, "snmpDir")
+      #print "sivuParseri.py::prepConfigs::printAll: Debug var: %s" % confFile.getVariableInd(0, "confDir")	
+
+
+   # NOTE For each FIXED config variable, we create a own function    
+   def getServerConfDir(self):
+      confFile = self.confFile
+      return confFile.getVariableInd(0, "serverConfDir")
+
+   def getSnmpDir(self):
+      confFile = self.confFile
+      return confFile.getVariableInd(0, "snmpDir")
+
 	
    def getAllConf(self):
 
-      
       # Ok. Lets return what ever we got...
       return self.confFile
-
 
 
 class prepData(Render) :
@@ -214,18 +248,10 @@ class prepData(Render) :
 
    def __init__(self, ds):
       # Prepare data for use
-      # Lets check that directory exists
-      if ( os.path.exists(ds)):
-	# Read files, create list of filenames
-	self.resFiles = self.listFiles(ds)
-      else:
-	# ERROR, this dir doesnt exist, create error message to be returned
-	errmsg = ["ERROR: Directory ("+ds+") doesnt exist..."] 
-	self.resFiles = errmsg
-
+      self.resFiles = self.listFiles(ds)
+      
    def listConfigData(self):
       # Read all the files for manipulating
-
       #resConfigList = jokuluokka.Parser(self.resFiles)
       return resList
 
@@ -245,7 +271,7 @@ class prepData(Render) :
       if ( os.path.exists(dirr) == 1 ):
 	 try:
 	    snmpfilut1 = dircache.listdir(dirr)
-	    # TODO: dircache is to be deprecated on ptyhon 2.6, this has to be changed...
+	    # TODO: dircache is to be deprecated on python 2.6, read-method has to be changed...
 	    l = len(snmpfilut1)
 	    # print "filut: %(1)s , len -> %(2)s <br>" % { '1':snmpfilut1, '2':l }
 	    if ( len(snmpfilut1) > 0 ):
@@ -283,6 +309,7 @@ class saveData(Render) :
    def getConfigFiles(self):
       return oldFilesList
 
+   # NOTE: This is to be moved to the dataHandler class
    def saveDataToFile(self, filesDir, values):
    # def saveDataToFile(self, oldFiles, values):
       # Normal command to save data. Check is it new or old.
@@ -294,17 +321,23 @@ class saveData(Render) :
       self.values = values
       workDir = self.workDir
       # gl = re.compile('$(values['name']).conf')
-      gl = re.compile(values['name'])
-      print "Debug: saveDataToFile: saving data (%s)" % values['name']
+      aw = 'serverconfig-'+values['name']+'.conf'
+      gl = re.compile(aw)
+      print "Debug: saveDataToFile: saving data (%s) (compared to string %s" % (values['name'], aw)
       # if ( len(filesDir) > 0 ):
       for kl in (filesDir):
 	if ( gl.match(kl) ):
-	  # Old value, update file (name is used for the filename)
+	  # TODO: if the name is same (at the moment comp doesnt work). ASK the user 
+	  # if we owerwrite the old file. 
+	  #
+	  # Old value, update file (name is used for the filename) -> Nope, we overwrite the file...
 	  print "lala, this file (%s) needs updating..." % kl
 	else:
 	  # new file, save it
 	  # resFile = open(values["name"], "w")
-	  resFile = open(os.path.join(filesDir, 'serverconfig-%s.conf' % values['name']), 'wb')
+	  # This cannot be "wb", the file doesnt exist yet...
+	  # "b" is for binary write, no need or that!
+	  resFile = open(os.path.join(filesDir, 'serverconfig-%s.conf' % values['name']), 'w')
 	  for lk in (values):
 	    val = "%s:%s\n" % (lk, values[lk])
 	    resFile.write(val)
@@ -320,14 +353,18 @@ class tester(Render):
 
 
 class doServerPage(Render) :
+  
+  # TODO: How the machines are handled? By results-file, config-file or maybe hash-code?
+  # At the moment, results cannot be connected to config-file (or vice versa). 
 
    def __init__(self, URL):
       Render.__init__(self, URL)
-      self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      self.ds = prepData(self.conf.getSnmpDir())
+      #self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
       self.bigList = snmpParseri.Parser(self.ds.getFilesList())
 
    def doPage(self, mach):
-      #@params: name of server or instance
+      #@params: name of server or instance from index.py
       #@return: None
       if (mach[0]):
 	 server = mach[0]
@@ -376,12 +413,20 @@ class doMachineList(Render) :
       # Basic init-method. This is used on creation.
       Render.__init__(self, koneet)
 
+      # Read all the files for manipulating
+      self.ds = prepData(self.conf.getSnmpDir())
+      #print "lalal %s" % self.ds
+      #self.testi = dataHandler.fileHandler(self.conf.getSnmpDir())
+      #self.ds2 = self.testi.listFiles(self.conf.getSnmpDir())
+      #self.ds2 = dataHandler.fileHandler.listFiles(self.conf.getSnmpDir())
+      
+      #self.sources = self.conf.getSnmpDir()
+      #print "Debug: source -> %s" % self.sources
       # joku = tester()
       # print joku.retS("testiiii")
-      # Read all the files for manipulating
-      self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      #self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
 
-      # Create one big hash-list of machineinformation
+      # Create one big hash-list of machine information from snmp-result files
       self.bigList = snmpParseri.Parser(self.ds.getFilesList())
       # This is the way to call object-lists...
 
@@ -397,31 +442,19 @@ class doMachineList(Render) :
 
       cou = 0
       allmac = len(kojeet)
-      contlist = []
+      #contlist = []
       self.tableStart()
-      self.tableRowStart()
-      self.tableCellStart()
-      print "Index"
-      self.tableCellEnd()
-      self.tableCellStart()
-      print "Server name"
-      self.tableCellEnd()
-      self.tableRowEnd()
+
+      contlist = ["Index", "Server name"]
+      self.addListToTableRow(contlist)
       for i in kojeet:
-	 self.tableRowStart()
-	 self.tableCellStart()
-	 print cou + 1
-	 self.tableCellEnd()
-	 self.tableCellStart()
-	 self.bStart()
+	 contlist[0] = cou + 1
 	 mac = bigList.machineNameInd(cou)
-	 print "%s" % self.inUrl("server/" + mac, mac)
-	 self.bEnd()
-	 # print "(machine no:", cou+1 ,")"
-	 self.tableCellEnd()
-	 self.tableRowEnd()
+	 contlist[1] = "%s %s %s" % (self.bStart(), self.inUrl("server/" + mac, mac), self.bEnd())
+	 self.addListToTableRow(contlist)
 	 cou = cou + 1
       self.tableEnd()
+
       self.cssEnd()
       self.footer()
 
@@ -441,13 +474,19 @@ class doConfigPage(Render) :
 
    def __init__(self, jep):
       Render.__init__(self, jep)
-      self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
-      self.confFiles = prepData("mach_confs")
+      
+      self.ds = prepData(self.conf.getSnmpDir())
+      #self.ds = prepData("/home/tommi/omat/python/snmpinfo/snmp_kyselyt")
+      
+      self.confFiles = prepData(self.conf.getServerConfDir())
+      #self.confFiles = prepData("mach_confs")
+
       # Create one big hash-list of machineinformation
       self.bigList = snmpParseri.Parser(self.ds.getFilesList())
 
 
    def doPage(self, something) :
+      # something should be the possible data of "old" machine
 
       self.header()
       self.cssClass('Config-page | %s ' %self.url(self.baseUrl, 'Frontpage'),'header')
@@ -456,6 +495,7 @@ class doConfigPage(Render) :
       bigList = self.bigList
       cofiles = self.confFiles.getFilesList()
       confData = dataHandler.fileHandler("mach_confs")
+      print "possible param from html-form -> %s <br>" % something
       # print "confs -> %s" % cofiles
       for j in cofiles:
 	print "confs -> %s <br>" % j
@@ -487,8 +527,6 @@ class doConfigPage(Render) :
 	 #cou = cou + 1
       print "<br> tadaa <br>"
       
-      #
-      # The old way
       machlist = ["Number", "Server name", "Select one"]
       self.addListToTableRow(machlist)
       for i in kojeet:
@@ -520,7 +558,7 @@ class doConfigPage(Render) :
       self.namelist = ['name', 'ip', 'dns', 'snmpver', 'snmpcomm', '1', '2', 'user', 'passu']
 
       self.emplist = {}
-      self.emplist[self.namelist[0]] = "Describing name of the machine."
+      self.emplist[self.namelist[0]] = "Describing name of the machine (has to be unique)."
       self.emplist[self.namelist[1]] = "IP"
       self.emplist[self.namelist[2]] = "DNS name of the machine."
       self.emplist[self.namelist[3]] = "Version of snmp (v2 only)."
@@ -529,6 +567,7 @@ class doConfigPage(Render) :
       self.emplist[self.namelist[6]] = "tba"
       self.emplist[self.namelist[7]] = "Your username for this page"
       self.emplist[self.namelist[8]] = "Your password to save data"
+      
 
       # testing the function, to see that the form works and saves dataFiles
       # TODO: move the editing page on its own, either with old data or to have new data
@@ -592,7 +631,7 @@ class doSaveDataPage(Render) :
       values = self.valuesList
       formData = self.filledForm
       oldFiles = self.oldFiles
-      filesDir = 'mach_conf'
+      filesDir = 'mach_confs'
       self.resultFile = ''
       self.blaah = saveData("data")
 

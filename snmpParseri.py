@@ -56,7 +56,7 @@ class Parser:
       # Testaamiseen
       # snmpt = ['SNMPv2-MIB::sysName.0 = STRING: byakhee', 'SNMPv2-MIB::sysLocation.0 = STRING: Kulkee ties missa...']
 
-      # This we shouldnt need, we returned list is allready a hash-list.
+      # This we shouldnt need, returned list is allready a hash-list.
       self.bigList =  {}
       cou = 0
 

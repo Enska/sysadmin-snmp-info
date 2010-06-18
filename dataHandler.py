@@ -11,7 +11,6 @@
 # if using db, then this class all is saved. caller must take care data integrity.
 #
 
-
 import dircache
 import os.path
 import re
@@ -28,28 +27,44 @@ class fileHandler:
     if (sourceFiles==None):
       # No file to read given, so we read ALL from sourceDirectory
       self.sourceFiles = self.listFiles(sourceDirectory)  
+      # print "sourceFiles -> %s , sourceDirectory -> %s " % (sourceFiles, sourceDirectory)
     else:
       # TODO: Lets check that file exists
       fil2 = []
       fil2.insert(0, sourceDirectory  + "/" + sourceFiles)
+      # print "fil2 -> %s, sourceFiles -> %s , sourceDirectory -> %s " % (fil2, sourceFiles, sourceDirectory)
       self.sourceFiles = fil2
     self.bigList =  {}
     cou = 0
-    print "sourcefiles -> %s" % sourceFiles
+    # print "dataHandler::filehanHandler::__init__: sourceFiles-list -> %s" % sourceFiles
 
     for sourceFile in self.sourceFiles:
       self.bigList[cou] = self.getDataFromFile(sourceFile)
-      print "Debug: one result (",cou,"): ", self.bigList[cou], "\n"
+      #print "dataHandler::fileHandler::__init__: Debug: result from bigList-list (%s : %s): %s\n\n" % (cou, sourceFile, self.bigList[cou])
       cou = cou + 1
+      #print "lalala %s" % self.bigList[cou-1]
     
+    #for k in self.bigList:
+      #print "fileHandler::__init__: Debug: BIGLIST: %s" % self.bigList[k]
+
+
+  def __len__(self):
+    # if empty list, return 0
+    self.leng = 0
+    if ( self.bigList == "" ):
+      true
+    else:
+      for aa in self.bigList:
+	self.leng=+1
+      
+    return self.leng
 
   def getDataFromFile(self, fileToRead):
     # This one reads the file trough. Collect everything from it and
     # returns it as a dict-list for the caller.
     #
     # FIX: Do a check that the file is really a txt-file.
-    #x
-    print "Debug: file to read -> %s <br> \n \n" % fileToRead
+    # print "dataHandler::fileHandler::getDataFromFile: Debug: file to read -> %s \n" % fileToRead
     self.lista = {}
     try:
       filu = open(fileToRead, 'r')
@@ -61,16 +76,17 @@ class fileHandler:
 	  continue
 	else :
 	  # string.strip(livi)
-	  livi.strip()
+	  #livi.strip()
+	  # livi.strip("\n")
 	  # TODO: Remove linebreak...
-	  livi+=livi.replace("\n","")
+	  # livi+=livi.replace("\n","")
 	  # print "DEBUG: line -> -%s- \n" % livi
 	  if livi.count('=') > 0:
 	    self.sep='='
 	  else :
 	    self.sep=':'
 	  key, value = self.fileLineSeparator(livi, self.sep)
-	  print "Debug: key -> %s, values -> %s \n" % (key,value)
+	  # print "dataHandler::fileHandler::getDataFromFile: Debug: key -> %s, values -> %s " % (key,value)
 	  self.lista[key] = value
       filu.close()
     except IOError, err:
@@ -84,15 +100,14 @@ class fileHandler:
 
   def fileLineSeparator(self, dataLine, separator) :
     # Params: one line of the read result.
-    # Action: split 
+    # Action: split the line on two parts (expect only one separator)
     finimi = ""
     finres = ""
     if dataLine == '' :
-      return "problem", "Line is empty"
-
+      return "problem", "Line was empty"
     # print "DEBUG: line -> \"%s\"" % dataLine
     parts = dataLine.split(separator)
-    return parts[0], parts[1]
+    return parts[0].strip(), parts[1].strip()
 
   def listFiles(self, dirr):
     # Read all the filenames and full paths to a list and returns this
@@ -114,6 +129,14 @@ class fileHandler:
 	print 'Couldnt open the file-directory (%r).' % ('dirr',), err
     
     return files2
+
+
+  def getVariableInd(self, ind, vari=None):
+    # Return the value of file on index ind and named vari
+    # Caller must know what to call
+    # 
+    #print "Debug: list -> %s, ind -> %s, vari -> %s" % (self.bigList[ind], ind, vari)
+    return self.bigList[ind].get(vari, 'err, nothing to return')
 
 
 

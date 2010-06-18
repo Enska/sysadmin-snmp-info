@@ -69,9 +69,11 @@ urls['kone'] = sivuParseri.doMachineList(contextRoot)
 urls['server'] = sivuParseri.doServerPage(contextRoot)
 urls['config'] = sivuParseri.doConfigPage(contextRoot)
 urls['savedata'] = sivuParseri.doSaveDataPage(contextRoot, filledForm)
-urls['update'] = sivuParseri.doBasicPage(contextRoot)
+urls['update'] = sivuParseri.doConfigPage(contextRoot)
 urls['debug'] = sivuParseri.doDebugPage(contextRoot, messag)
 urls['error'] = sivuParseri.Error(contextRoot)
+
+# update page should go to configpage but with old data
 
 # if urls.has_key(path[0]):
 if urls.has_key(path[0]):
@@ -85,6 +87,7 @@ else:
    # The debug way to call. Uncomment this to see first the debug, then
    # the normal DEFAULT page.
    # urls['debug'].doPage(path[1:], messag)
+   # urls['config'].doPage(path[1:])
 
    # The normal way to call
    urls['/'].doPage()
